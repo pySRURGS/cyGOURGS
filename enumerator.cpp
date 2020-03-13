@@ -1,3 +1,8 @@
+#include <time.h>
+#include <stdio.h>
+#include <string>
+
+
 #include "enumerator.h"
 #include "boost/algorithm/string/replace.hpp"
 #include "time.h"
@@ -24,11 +29,13 @@ string Enumerator::uniform_random_global_search_once(int n)
 {
     //srand ( time(0) );
     string candidate_solution = "";
-    int i = rand() % n;
+    //int i = rand() % n;
+    int i = 918;
     int r_i = calculate_R_i(i);
     int s_i = calculate_S_i(i);
-    int r = rand() % r_i - 1;
-    int s = rand() % s_i - 1;
+//    int r = rand() % r_i - 1;
+//    int s = rand() % s_i - 1;
+    int r = 27; int s = 31625;
     candidate_solution = generate_specified_solution( i, r, s, n );
     return candidate_solution;
 }
@@ -106,8 +113,12 @@ int Enumerator::calculate_l_i_b(int i, int b)
         int e = (i - 1) / k;
         int j = (i - 1) % k;
         int m = arities[j];
+        if ( m == arities[b] )
+        {
+            l_i_b += 1;
+        }
         vector<int> e_base_arity = decimal_to_base_m(e,m);
-        vector<vector<int>> list_bits = deinterleave(e_base_arity, m);
+        vector<int> list_bits = deinterleave(e_base_arity, m);
         vector<int> list_bits_deci;
         for(int u = 0; u < list_bits.size(); u++)
         {
@@ -124,7 +135,7 @@ int Enumerator::calculate_l_i_b(int i, int b)
 
 int Enumerator::calculate_a_i(int i)
 {
-    vector<int> arities;
+    vector<int> arities = m_primitiveSet.get_arities();
     int k = arities.size();
     int a_i = 0;
     if( i == 0 )
@@ -141,7 +152,7 @@ int Enumerator::calculate_a_i(int i)
         int j = (i - 1) % k;
         int m = arities[j];
         vector<int> e_base_arity = decimal_to_base_m(e,m);
-        vector<vector<int>> list_bits = deinterleave(e_base_arity, m);
+        vector<int> list_bits = deinterleave(e_base_arity, m);
         vector<int> list_bits_deci;
         for(int u = 0; u < list_bits.size(); u++)
         {
@@ -153,6 +164,7 @@ int Enumerator::calculate_a_i(int i)
             a_i += calculate_a_i(i_deinterleave);
         }
     }
+    return a_i;
 }
 
 string Enumerator::generate_specified_solution(int i, int r, int s, int n)
@@ -177,7 +189,15 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
     string tree = "";
     tree = ith_n_ary_tree(i);
     vector<int> g_i_b_values = calculate_all_G_i_b(i);
-    vector<int> operator_config_indices; // todo unravel_index
+    vector<int> operator_config_indices;
+
+    //equivalent of python unravel_index ( value, list )
+    operator_config_indices.push_back( r );
+    for(int ii = 1; ii < g_i_b_values.size(); ii++ )
+    {
+        operator_config_indices.push_back( 0 );
+    }
+
     vector<vector<string>> operator_config;
     vector<int> arities = m_primitiveSet.get_arities();
     for(int b = 0; b < operator_config_indices.size(); b++ )
@@ -198,9 +218,10 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
     string workingTree = tree;
     string tempTree;
     int num_opers = std::count( tree.begin(), tree.end(), '[' );
+    int start_index = -1;
     for( int ii = 0; ii < num_opers ; ii++ )
     {
-        int start_index = workingTree.find("[");
+        start_index = workingTree.find("[", start_index+1);
         int arity = get_arity_of_term( start_index, workingTree );
         int index = -1;
         for( int jj = 0; jj < arities.size(); jj++ )
@@ -211,18 +232,24 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
                 break;
             }
         }
+        if( index == -1 )
+        {
+            continue;
+        }
         vector<string> operator_config_vector = operator_config[index];
         string my_operator = operator_config_vector[operator_config_vector.size()-1];
+        operator_config[index].pop_back();
         tempTree = workingTree.substr(0, start_index );
         tempTree.append(my_operator); tempTree.append("("); tempTree.append(workingTree.substr(start_index+1,workingTree.length() - start_index - 1 ));
         workingTree = tempTree;
+        start_index += my_operator.size();
     }
-    boost::replace_all( tempTree, "]", ")" );
-
+    boost::replace_all( workingTree, "]", ")" );
     int num_terminals = findOccurenciesCount( workingTree, ".." );
     for( int ii = 0; ii < num_terminals; ii++)
     {
-        string terminal = terminal_config[ii].substr(terminal_config[ii].size()-1,1);
+        string terminal = terminal_config[terminal_config.size()-1];
+        terminal_config.pop_back();
         boost::replace_first( workingTree, "..", terminal );
     }
     tree = workingTree;
@@ -235,13 +262,13 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
 string Enumerator::ith_n_ary_tree(int i)
 {
     vector<int> arities = m_primitiveSet.get_arities();
-    string tree;
+    string tree ="";
     int k = arities.size();
     if( i == 0 )
     {
         tree = "..";
     }
-    else if (1 <=i && i <= k)
+    else if ( 1 <=i && i <= k )
     {
         tree = "[";
         int m = arities[i-1];
@@ -249,9 +276,8 @@ string Enumerator::ith_n_ary_tree(int i)
         {
             tree +="..,";
         }
-        string reverseTree = tree;
-        std::reverse(reverseTree.begin(), reverseTree.end());
-        tree = reverseTree + "]";
+        string cutTree = tree.substr(0, tree.size() - 1);
+        tree = cutTree + "]";
     }
     else
     {
@@ -259,7 +285,7 @@ string Enumerator::ith_n_ary_tree(int i)
         int j = (i - 1) % k;
         int m = arities[j];
         vector<int> e_base_arity = decimal_to_base_m(e,m);
-        vector<vector<int>> list_bits = deinterleave(e_base_arity, m);
+        vector<int> list_bits = deinterleave(e_base_arity, m);
         vector<int> list_bits_deci;
         for(int u = 0; u < list_bits.size(); u++)
         {
@@ -271,10 +297,14 @@ string Enumerator::ith_n_ary_tree(int i)
             subtrees.push_back(ith_n_ary_tree(list_bits_deci[x]));
         }
         tree = "[";
-        tree.append(",");
+        //tree.append(",");
         for(int j = 0; j < subtrees.size(); j++)
         {
             tree.append(subtrees[j]);
+            if( j < subtrees.size() - 1)
+            {
+               tree.append(",");
+            }
         }
         tree.append("]");
     }
@@ -298,7 +328,7 @@ int Enumerator::get_arity_of_term(int start_index, const string& tree){
     */
     int bracket_counter = 0;
     int arity = 1;
-    if (tree.c_str()[start_index] == '[' )
+    if (tree.c_str()[start_index] != '[' )
     {
         cerr << "Start index must point to a square bracket";
         throw 2;
@@ -374,29 +404,42 @@ vector<int> Enumerator::numberToBase(int n, int b)
      return digits;
 }
 
-int Enumerator::base_m_to_decimal(const std::vector<int>& v, int m)
+int val(char c)
 {
-   int result = 0;
-   if (m == 1)
-   {
-       for(int i=0; i<v.size();i++)
-       {
-           result = result + v[i];
-       }
-   }
-   else if (m>=2)
-   {
-       vector<int> reverse_number = v;
-       std::reverse(reverse_number.begin(), reverse_number.end());
-       for(int i = 0; i < reverse_number.size(); i++)
-       {
-            result += reverse_number[i] * pow(m,i);
-       }
-   }
-   return result;
+    if (c >= '0' && c <= '9')
+        return (int)c - '0';
+    else
+        return (int)c - 'A' + 10;
 }
 
-vector<vector<int>> Enumerator::deinterleave(vector<int> num, int m)
+int Enumerator::base_m_to_decimal(int v, int m)
+{
+   string str_v = to_string(v);
+   const char* str = str_v.c_str();
+   int len = strlen(str);
+   int power = 1; // Initialize power of m
+   int num = 0;  // Initialize result
+   int i;
+
+   // Decimal equivalent is str[len-1]*1 +
+   // str[len-1]*m + str[len-1]*(m^2) + ...
+   for (i = len - 1; i >= 0; i--)
+   {
+       // A digit in input number must be
+       // less than number's base
+       if (val(str[i]) >= m)
+       {
+          printf("Invalid Number");
+          return -1;
+       }
+
+       num += val(str[i]) * power;
+       power = power * m;
+   }
+   return num;
+}
+
+vector<int> Enumerator::deinterleave(vector<int> num, int m)
 {
     vector<vector<int>> elements;
     for(int i = 0; i < m; i++ )
@@ -415,7 +458,16 @@ vector<vector<int>> Enumerator::deinterleave(vector<int> num, int m)
             elements[j].push_back(num[i+j]);
         }
     }
-    return elements;
+   vector<int> elemsLin;
+   for(int i = 0; i < elements.size();i++)
+   {
+       elemsLin.push_back(0);
+       for(int j=0; j < elements[j].size(); j++ )
+       {
+           elemsLin[i] += elements[i][j] * (pow(10,elements[j].size() - j - 1));
+       }
+   }
+    return elemsLin;
 }
 
 
@@ -477,47 +529,41 @@ vector<string> Enumerator::get_element_of_cartesian_product(vector<vector<string
     int j;
     vector<vector<string>> pools_temp;
     vector<string> ith_item;
-    vector<int> index_list;
 
-    len_product = pools[0].size();
-    len_pools = pools.size();
-    for (j=1; j<len_pools; j++)
-    {
-        len_product = len_product * pools[j].size();
-    }
+
     for (i=0; i<repeat; i++)
     {
-        pools_temp[i].insert(pools_temp[i].end(),
-                             pools[i].begin(),
-                             pools[i].end());
+        pools_temp.push_back(pools[0]);
     }
-    pools = pools_temp;
+    len_product = pools_temp[0].size();
+    len_pools = pools_temp.size();
+    for (j=1; j<len_pools; j++)
+    {
+        len_product = len_product * pools_temp[j].size();
+    }
+
+//    pools = pools_temp;
     if (index >= len_product)
     {
         cerr << "index + 1 is bigger than the length of the product";
         throw 2;
     }
+
+    vector<int> index_list;
     for (j=0; j<len_pools; j++)
     {
         ith_pool_index = index;
         denominator = 1;
-        for (k=j; k<len_pools; k++)
-            {denominator = denominator * pools[k].size();}
-        ith_pool_index = floor(ith_pool_index/denominator);
-    }
-    for (j=0; j<len_pools; j++)
-    {
         for (k=j+1; k<len_pools; k++)
-            {denominator = denominator * pools[k].size();}
-        ith_pool_index = floor(ith_pool_index/denominator);
+            {denominator *= pools_temp[k].size();}
+        ith_pool_index /= denominator;
         if (j != 0)
-            {ith_pool_index = ith_pool_index % pools[j].size();}
+            {ith_pool_index %= pools_temp[j].size();}
         index_list.push_back(ith_pool_index);
     }
     for (index=0; index<len_pools; index++)
     {
         index_temp = index_list[index];
-        pools_temp[index] = pools[index];
         ith_item.push_back(pools_temp[index][index_temp]);
     }
     return ith_item;
@@ -528,15 +574,16 @@ int Enumerator::findOccurenciesCount(const std::string& data, const std::string&
 {
     // Get the first occurrence
     int count = 0;
-    size_t pos = data.find(toSearch);
+    size_t pos = data.find( toSearch );
 
     // Repeat till end is reached
-    while( pos != std::string::npos)
+    while( pos != std::string::npos )
     {
         count++;
         // Get the next occurrence from the current position
         pos = data.find( toSearch, pos + toSearch.size() );
     }
+    return count;
 }
 
 

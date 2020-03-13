@@ -30,8 +30,8 @@ private:
 
     std::vector<int> decimal_to_base_m(int decimal, int m);
     std::vector<int> numberToBase(int n,int b);
-    int base_m_to_decimal(const std::vector<int>& v, int m);
-    std::vector<std::vector<int>> deinterleave(std::vector<int> num, int n);
+    int base_m_to_decimal(int v, int m);
+    std::vector<int> deinterleave(std::vector<int> num, int n);
 
     int findOccurenciesCount(const std::string& text, const std::string& patt);
 
