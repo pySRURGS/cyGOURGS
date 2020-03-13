@@ -23,12 +23,13 @@ std::vector<std::string> Enumerator::uniform_random_global_search_once(int n, in
 string Enumerator::uniform_random_global_search_once(int n)
 {
     //srand ( time(0) );
+    string candidate_solution = "";
     int i = rand() % n;
     int r_i = calculate_R_i(i);
     int s_i = calculate_S_i(i);
     int r = rand() % r_i - 1;
     int s = rand() % s_i - 1;
-    string candidate_solution = generate_specified_solution( i, r, s, n );
+    candidate_solution = generate_specified_solution( i, r, s, n );
     return candidate_solution;
 }
 
@@ -173,7 +174,8 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
         cerr << "Enumerator::generate_specified_solution InvalidTreeIndex" << endl;
         return "";
     }
-    string tree = ith_n_ary_tree(i);
+    string tree = "";
+    tree = ith_n_ary_tree(i);
     vector<int> g_i_b_values = calculate_all_G_i_b(i);
     vector<int> operator_config_indices; // todo unravel_index
     vector<vector<string>> operator_config;
@@ -198,7 +200,7 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
     int num_opers = std::count( tree.begin(), tree.end(), '[' );
     for( int ii = 0; ii < num_opers ; ii++ )
     {
-        int start_index = workingTree.find_first_of('[');
+        int start_index = workingTree.find("[");
         int arity = get_arity_of_term( start_index, workingTree );
         int index = -1;
         for( int jj = 0; jj < arities.size(); jj++ )
@@ -217,7 +219,7 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
     }
     boost::replace_all( tempTree, "]", ")" );
 
-    int num_terminals = std::count( workingTree.begin(), workingTree.end(), ".." );
+    int num_terminals = findOccurenciesCount( workingTree, ".." );
     for( int ii = 0; ii < num_terminals; ii++)
     {
         string terminal = terminal_config[ii].substr(terminal_config[ii].size()-1,1);
@@ -519,6 +521,22 @@ vector<string> Enumerator::get_element_of_cartesian_product(vector<vector<string
         ith_item.push_back(pools_temp[index][index_temp]);
     }
     return ith_item;
+}
+
+
+int Enumerator::findOccurenciesCount(const std::string& data, const std::string& toSearch)
+{
+    // Get the first occurrence
+    int count = 0;
+    size_t pos = data.find(toSearch);
+
+    // Repeat till end is reached
+    while( pos != std::string::npos)
+    {
+        count++;
+        // Get the next occurrence from the current position
+        pos = data.find( toSearch, pos + toSearch.size() );
+    }
 }
 
 

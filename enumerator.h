@@ -33,6 +33,7 @@ private:
     int base_m_to_decimal(const std::vector<int>& v, int m);
     std::vector<std::vector<int>> deinterleave(std::vector<int> num, int n);
 
+    int findOccurenciesCount(const std::string& text, const std::string& patt);
 
 private:
     PrimitiveSet    m_primitiveSet;
