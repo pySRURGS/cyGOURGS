@@ -8,7 +8,6 @@ PrimitiveSet::PrimitiveSet()
 
 }
 
-
 void PrimitiveSet::add_operator(const std::string& funct_name, int arity, const std::string& datatype/*="default"*/)
 {
     if (arity < 1)

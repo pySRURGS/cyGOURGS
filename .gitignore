@@ -1,1 +1,5 @@
 *.pro.user
+*.h.gch
+*.exe
+*.bak
+*.autosave

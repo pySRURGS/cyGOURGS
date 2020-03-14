@@ -1,6 +1,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <string>
+#include <sys/time.h>
 
 
 #include "enumerator.h"
@@ -27,15 +28,22 @@ std::vector<std::string> Enumerator::uniform_random_global_search_once(int n, in
 
 string Enumerator::uniform_random_global_search_once(int n)
 {
-    //srand ( time(0) );
+    // srand ( GetTickCount() );
+    struct timeval time;
+    gettimeofday(&time,NULL);
+    // microsecond has 1 000 000
+    // Assuming you did not need quite that accuracy
+    // Also do not assume the system clock has that accuracy.
+    srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
     string candidate_solution = "";
-    //int i = rand() % n;
-    int i = 918;
+    int i = rand() % n;
+    //int i = 918;
     int r_i = calculate_R_i(i);
     int s_i = calculate_S_i(i);
-//    int r = rand() % r_i - 1;
-//    int s = rand() % s_i - 1;
-    int r = 27; int s = 31625;
+    int r = rand() % r_i;
+    int s = rand() % s_i;
+    // int r = 27; int s = 31625;
+    printf("\ni: %d, r: %d, s: %d, n: %d\n",i,r,s,n);
     candidate_solution = generate_specified_solution( i, r, s, n );
     return candidate_solution;
 }
@@ -58,13 +66,16 @@ int Enumerator::calculate_R_i(int i)
     }
     return r_i;
 }
+
 int Enumerator::calculate_S_i(int i)
 {
     int m = m_primitiveSet.get_terminals().size();
     int j_i = calculate_a_i(i);
+    //TODO: remove usage of mempower and use pow instead,m and j_i have small values
     int S_i = (int)m_primitiveSet.mempower(m, j_i);
     return S_i;
 }
+
 vector<int> Enumerator::calculate_all_G_i_b(int i)
 {
     vector<int> arities = m_primitiveSet.get_arities();
@@ -82,6 +93,7 @@ int Enumerator::calculate_G_i_b(int i, int b)
     vector<int> arities = m_primitiveSet.get_arities();
     int f_b = m_primitiveSet.get_operators(arities[b]).size();
     int l_i_b = calculate_l_i_b( i, b );
+    //TODO: remove usage of mempower and use pow instead, m and j_i have small values
     mp::cpp_int G_i_b = m_primitiveSet.mempower(f_b, l_i_b );
     //:TODO: type conversion here
     return (int)G_i_b;
@@ -246,6 +258,11 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
     }
     boost::replace_all( workingTree, "]", ")" );
     int num_terminals = findOccurenciesCount( workingTree, ".." );
+    if ( num_terminals != terminal_config.size() )
+    {
+        cerr << "Occurencies of '..' should have the same count with terminal_config vector" << endl;
+        throw 2;
+    }
     for( int ii = 0; ii < num_terminals; ii++)
     {
         string terminal = terminal_config[terminal_config.size()-1];
@@ -254,10 +271,7 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
     }
     tree = workingTree;
     return tree;
-
 }
-
-
 
 string Enumerator::ith_n_ary_tree(int i)
 {
@@ -404,14 +418,6 @@ vector<int> Enumerator::numberToBase(int n, int b)
      return digits;
 }
 
-int val(char c)
-{
-    if (c >= '0' && c <= '9')
-        return (int)c - '0';
-    else
-        return (int)c - 'A' + 10;
-}
-
 int Enumerator::base_m_to_decimal(int v, int m)
 {
    string str_v = to_string(v);
@@ -427,16 +433,24 @@ int Enumerator::base_m_to_decimal(int v, int m)
    {
        // A digit in input number must be
        // less than number's base
-       if (val(str[i]) >= m)
+       if (numVal(str[i]) >= m)
        {
           printf("Invalid Number");
           return -1;
        }
 
-       num += val(str[i]) * power;
+       num += numVal(str[i]) * power;
        power = power * m;
    }
    return num;
+}
+
+int Enumerator::numVal(char c)
+{
+    if (c >= '0' && c <= '9')
+        return (int)c - '0';
+    else
+        return (int)c - 'A' + 10;
 }
 
 vector<int> Enumerator::deinterleave(vector<int> num, int m)
@@ -462,105 +476,55 @@ vector<int> Enumerator::deinterleave(vector<int> num, int m)
    for(int i = 0; i < elements.size();i++)
    {
        elemsLin.push_back(0);
-       for(int j=0; j < elements[j].size(); j++ )
+       for(int j=0; j < elements[i].size(); j++ )
        {
-           elemsLin[i] += elements[i][j] * (pow(10,elements[j].size() - j - 1));
+           elemsLin[i] += elements[i][j] * (pow(10,elements[i].size() - j - 1));
        }
    }
     return elemsLin;
 }
-
-
-int Enumerator::countFreq(const string &pat, const string &txt){
-    /*
-        Given a input string and a substring.
-        Find the frequency of occurrences of substring in given string.
-    */
-    int M = pat.length();
-    int N = txt.length();
-    int res = 0;
-    /* A loop to slide pat[] one by one */
-    for (int i = 0; i <= N - M; i++)
-    {
-        /* For current index i, check for
-           pattern match */
-        int j;
-        for (j = 0; j < M; j++)
-            if (txt[i+j] != pat[j])
-                break;
-
-        // if pat[0...M-1] = txt[i, i+1, ...i+M-1]
-        if (j == M)
-        {
-           res++;
-           j = 0;
-        }
-    }
-    return res;
-}
-
-
-int Enumerator::count_nodes_in_tree(const string& tree){
-    /*
-        Given an n-ary tree in string format,
-        counts the number of nodes in the tree
-    */
-    int n_terminals;
-    int n_operators;
-    int n_nodes;
-    string operator_string = "[";
-    string terminal_string = "..";
-    n_operators = countFreq(operator_string, tree);
-    n_terminals = countFreq(terminal_string, tree);
-    n_nodes = n_terminals + n_operators;
-    return n_nodes;
-}
-
 vector<string> Enumerator::get_element_of_cartesian_product(vector<vector<string>> pools,
                                                 int repeat,
-                                                int index){
-    int len_product;
-    int len_pools;
-    int ith_pool_index = 0;
-    int denominator = 1;
-    int index_temp;
-    int i;
-    int k;
-    int j;
+                                                int index)
+{
     vector<vector<string>> pools_temp;
     vector<string> ith_item;
 
+    if( repeat == 0 || pools.size() == 0 )
+    {
+        return ith_item;
+    }
 
-    for (i=0; i<repeat; i++)
+    for (int i=0; i<repeat; i++)
     {
         pools_temp.push_back(pools[0]);
     }
-    len_product = pools_temp[0].size();
-    len_pools = pools_temp.size();
-    for (j=1; j<len_pools; j++)
+    int len_product = pools_temp[0].size();
+    int len_pools = pools_temp.size();
+    for (int j=1; j<len_pools; j++)
     {
-        len_product = len_product * pools_temp[j].size();
+        len_product *= pools_temp[j].size();
     }
-
-//    pools = pools_temp;
     if (index >= len_product)
     {
         cerr << "index + 1 is bigger than the length of the product";
         throw 2;
     }
-
     vector<int> index_list;
-    for (j=0; j<len_pools; j++)
+    int denominator = 1;
+    int ith_pool_index = 0;
+    for (int j=0; j<len_pools; j++)
     {
         ith_pool_index = index;
         denominator = 1;
-        for (k=j+1; k<len_pools; k++)
+        for (int k=j+1; k<len_pools; k++)
             {denominator *= pools_temp[k].size();}
         ith_pool_index /= denominator;
         if (j != 0)
             {ith_pool_index %= pools_temp[j].size();}
         index_list.push_back(ith_pool_index);
     }
+    int index_temp;
     for (index=0; index<len_pools; index++)
     {
         index_temp = index_list[index];
@@ -568,7 +532,6 @@ vector<string> Enumerator::get_element_of_cartesian_product(vector<vector<string
     }
     return ith_item;
 }
-
 
 int Enumerator::findOccurenciesCount(const std::string& data, const std::string& toSearch)
 {
@@ -585,5 +548,3 @@ int Enumerator::findOccurenciesCount(const std::string& data, const std::string&
     }
     return count;
 }
-
-
