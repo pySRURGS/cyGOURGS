@@ -50,8 +50,8 @@ string Enumerator::uniform_random_global_search_once(int n)
     int i = weightdist(gen);
     int r_i = calculate_R_i(i);
     int s_i = calculate_S_i(i);
-    boost::random::uniform_int_distribution<> r_dist(0,r_i);
-    boost::random::uniform_int_distribution<> s_dist(0,s_i);
+    boost::random::uniform_int_distribution<> r_dist( 0, r_i-1 );
+    boost::random::uniform_int_distribution<> s_dist( 0,s_i-1 );
     int r = r_dist(gen);
     int s = s_dist(gen);
     //    int i = 918;
