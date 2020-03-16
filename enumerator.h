@@ -12,6 +12,7 @@ public:
     std::string uniform_random_global_search_once(int n);
     int calculate_R_i(int i);
     int calculate_S_i(int i);
+    std::vector<int> calculate_Q(int n);
     std::vector<int> calculate_all_G_i_b(int i);
     int calculate_G_i_b(int i, int b);
     int calculate_l_i_b(int i, int b);
@@ -33,6 +34,8 @@ private:
 
 private:
     PrimitiveSet    m_primitiveSet;
+    std::vector<int> m_results_for_calculate_Q;
+    std::vector<int> m_q;
 };
 
 #endif // ENUMERATOR_H

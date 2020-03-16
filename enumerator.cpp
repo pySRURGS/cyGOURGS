@@ -2,18 +2,19 @@
 #include <stdio.h>
 #include <string>
 #include <sys/time.h>
-
+#include <random>
 
 #include "enumerator.h"
 #include "boost/algorithm/string/replace.hpp"
-#include "time.h"
+#include "boost/random/discrete_distribution.hpp"
 
 using namespace std;
 namespace mp = boost::multiprecision;
 
+
 Enumerator::Enumerator(PrimitiveSet& primitiveSet)
+    :    m_primitiveSet(primitiveSet)
 {
-    m_primitiveSet = primitiveSet;
 }
 
 std::vector<std::string> Enumerator::uniform_random_global_search_once(int n, int num_iters)
@@ -35,15 +36,28 @@ string Enumerator::uniform_random_global_search_once(int n)
     // Assuming you did not need quite that accuracy
     // Also do not assume the system clock has that accuracy.
     srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-    string candidate_solution = "";
-    int i = rand() % n;
-    //int i = 918;
+
+    vector<int> weights = calculate_Q(n);
+    double sum_of_weight = 0;
+    for(int j=0; j<n; j++) {
+       sum_of_weight += weights[j];
+    }
+    vector<double> norm_weights;
+    for(int j=0; j<n; j++) {
+       norm_weights.push_back( weights[j] / sum_of_weight );
+    }
+    boost::mt19937 gen;
+    gen.seed((time.tv_sec * 1000) + (time.tv_usec / 1000));
+    boost::random::discrete_distribution<> weightdist( norm_weights.begin(), norm_weights.end() );
+    int i = weightdist(gen);
+//    int i = 918;
     int r_i = calculate_R_i(i);
     int s_i = calculate_S_i(i);
     int r = rand() % r_i;
     int s = rand() % s_i;
     // int r = 27; int s = 31625;
     printf("\ni: %d, r: %d, s: %d, n: %d\n",i,r,s,n);
+    string candidate_solution = "";
     candidate_solution = generate_specified_solution( i, r, s, n );
     return candidate_solution;
 }
@@ -74,6 +88,29 @@ int Enumerator::calculate_S_i(int i)
     //TODO: remove usage of mempower and use pow instead,m and j_i have small values
     int S_i = (int)m_primitiveSet.mempower(m, j_i);
     return S_i;
+}
+
+vector<int> Enumerator::calculate_Q(int n)
+{
+    int q = 0;
+    int r_i;
+    int s_i;
+    int product;
+    if( n < m_results_for_calculate_Q.size())
+    {
+        return m_results_for_calculate_Q;
+    }
+    for(int i=0;i<n;i++)
+    {
+        r_i = calculate_R_i(i);
+        s_i = calculate_S_i(i);
+        product = s_i * r_i;
+        q+=product;
+        m_q.push_back(q);
+        m_results_for_calculate_Q.push_back( product );
+
+    }
+    return m_results_for_calculate_Q;
 }
 
 vector<int> Enumerator::calculate_all_G_i_b(int i)
