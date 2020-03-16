@@ -35,7 +35,7 @@ private:
 private:
     PrimitiveSet    m_primitiveSet;
     std::vector<int> m_results_for_calculate_Q;
-    std::vector<int> m_q;
+    //std::vector<int> m_q;
 };
 
 #endif // ENUMERATOR_H

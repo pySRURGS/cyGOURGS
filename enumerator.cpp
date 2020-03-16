@@ -29,14 +29,6 @@ std::vector<std::string> Enumerator::uniform_random_global_search_once(int n, in
 
 string Enumerator::uniform_random_global_search_once(int n)
 {
-    // srand ( GetTickCount() );
-    struct timeval time;
-    gettimeofday(&time,NULL);
-    // microsecond has 1 000 000
-    // Assuming you did not need quite that accuracy
-    // Also do not assume the system clock has that accuracy.
-    srand((time.tv_sec * 1000) + (time.tv_usec / 1000));
-
     vector<int> weights = calculate_Q(n);
     double sum_of_weight = 0;
     for(int j=0; j<n; j++) {
@@ -46,19 +38,26 @@ string Enumerator::uniform_random_global_search_once(int n)
     for(int j=0; j<n; j++) {
        norm_weights.push_back( weights[j] / sum_of_weight );
     }
+
     boost::mt19937 gen;
+    struct timeval time;
+    gettimeofday(&time,NULL);
+    // microsecond has 1 000 000
+    // Assuming you did not need quite that accuracy
+    // Also do not assume the system clock has that accuracy.
     gen.seed((time.tv_sec * 1000) + (time.tv_usec / 1000));
     boost::random::discrete_distribution<> weightdist( norm_weights.begin(), norm_weights.end() );
     int i = weightdist(gen);
-//    int i = 918;
     int r_i = calculate_R_i(i);
     int s_i = calculate_S_i(i);
-    int r = rand() % r_i;
-    int s = rand() % s_i;
+    boost::random::uniform_int_distribution<> r_dist(0,r_i);
+    boost::random::uniform_int_distribution<> s_dist(0,s_i);
+    int r = r_dist(gen);
+    int s = s_dist(gen);
+    //    int i = 918;
     // int r = 27; int s = 31625;
     printf("\ni: %d, r: %d, s: %d, n: %d\n",i,r,s,n);
-    string candidate_solution = "";
-    candidate_solution = generate_specified_solution( i, r, s, n );
+    string candidate_solution = generate_specified_solution( i, r, s, n );
     return candidate_solution;
 }
 
@@ -92,7 +91,7 @@ int Enumerator::calculate_S_i(int i)
 
 vector<int> Enumerator::calculate_Q(int n)
 {
-    int q = 0;
+//    int q = 0;
     int r_i;
     int s_i;
     int product;
@@ -105,8 +104,9 @@ vector<int> Enumerator::calculate_Q(int n)
         r_i = calculate_R_i(i);
         s_i = calculate_S_i(i);
         product = s_i * r_i;
-        q+=product;
-        m_q.push_back(q);
+//        q is nerver used; Uncomment code if it is the case
+//        q+=product;
+//        m_q.push_back(q);
         m_results_for_calculate_Q.push_back( product );
 
     }
@@ -220,7 +220,7 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
 {
     int r_i = calculate_R_i(i);
     int s_i = calculate_S_i(i);
-    if ( ( r >= r_i ) || (r < 0 ) )
+    if ( ( r >= r_i ) || ( r < 0 ) )
     {
         cerr << "Enumerator::generate_specified_solution: invalid operator" << endl;
         return "";
