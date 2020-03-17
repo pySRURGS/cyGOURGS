@@ -36,6 +36,9 @@ private:
     PrimitiveSet    m_primitiveSet;
     std::vector<int> m_results_for_calculate_Q;
     //std::vector<int> m_q;
+    std::map<int, std::vector<int>> m_all_g_is;
+    std::map<int,int> m_s_is;
+    std::map<int,int> m_r_is;
 };
 
 #endif // ENUMERATOR_H

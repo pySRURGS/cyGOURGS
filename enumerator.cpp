@@ -63,6 +63,15 @@ string Enumerator::uniform_random_global_search_once(int n)
 
 int Enumerator::calculate_R_i(int i)
 {
+    std::map<int, int>::iterator it = m_r_is.find(i);
+    if( it != m_r_is.end())
+    {
+        return it->second;
+    }
+    if( m_r_is.size() > i )
+    {
+        return m_r_is[i];
+    }
     if ( i == 0 )
     {
         return 1;
@@ -77,16 +86,23 @@ int Enumerator::calculate_R_i(int i)
             r_i = r_i * g_i_b;
         }
     }
+    m_r_is[i] = r_i;
     return r_i;
 }
 
 int Enumerator::calculate_S_i(int i)
 {
+    std::map<int, int>::iterator it = m_s_is.find(i);
+    if( it != m_s_is.end() )
+    {
+        return it->second;
+    }
     int m = m_primitiveSet.get_terminals().size();
     int j_i = calculate_a_i(i);
     //TODO: remove usage of mempower and use pow instead,m and j_i have small values
-    int S_i = (int)m_primitiveSet.mempower(m, j_i);
-    return S_i;
+    int s_i = pow(m, j_i);
+    m_s_is[i] = s_i;
+    return s_i;
 }
 
 vector<int> Enumerator::calculate_Q(int n)
@@ -115,6 +131,12 @@ vector<int> Enumerator::calculate_Q(int n)
 
 vector<int> Enumerator::calculate_all_G_i_b(int i)
 {
+     std::map<int, std::vector<int>>::iterator it = m_all_g_is.find(i);
+     if( it != m_all_g_is.end() )
+     {
+         return it->second;
+     }
+
     vector<int> arities = m_primitiveSet.get_arities();
     int k = arities.size();
     vector<int> list_g_i_b;
@@ -122,6 +144,7 @@ vector<int> Enumerator::calculate_all_G_i_b(int i)
     {
         list_g_i_b.push_back(calculate_G_i_b(i,b));
     }
+    m_all_g_is[i] = list_g_i_b;
     return list_g_i_b;
 }
 
@@ -130,10 +153,8 @@ int Enumerator::calculate_G_i_b(int i, int b)
     vector<int> arities = m_primitiveSet.get_arities();
     int f_b = m_primitiveSet.get_operators(arities[b]).size();
     int l_i_b = calculate_l_i_b( i, b );
-    //TODO: remove usage of mempower and use pow instead, m and j_i have small values
-    mp::cpp_int G_i_b = m_primitiveSet.mempower(f_b, l_i_b );
-    //:TODO: type conversion here
-    return (int)G_i_b;
+    int g_i_b = pow(f_b, l_i_b );
+    return g_i_b;
 }
 
 int Enumerator::calculate_l_i_b(int i, int b)

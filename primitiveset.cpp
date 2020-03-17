@@ -51,23 +51,6 @@ std::vector<std::string> PrimitiveSet::get_operators(int arity)
     return m_operators_map[arity];
 }
 
-mp::cpp_int PrimitiveSet::mempower(mp::cpp_int a, int b){
-    /*
-    Same as pow, but able to handle extremely large values.
-    Parameters
-    ----------
-    a: boost::multiprecision::cpp_int
-    b: int
-    Returns
-    -------
-    result: boost::multiprecision::cpp_int
-        `a ** b`
-    */
-    mp::cpp_int result;
-    result = mp::pow(a, b);
-    return result;
-}
-
 vector<int> PrimitiveSet::extract_keys(map<int, vector<string>> const& input_map){
     /*
     Returns all the keys in a mapping of integers to vector<strings>

@@ -86,9 +86,6 @@ public:
     std::vector<int> get_arities();
 
     std::vector<std::string> get_operators(int arity);
-
-    boost::multiprecision::cpp_int mempower(boost::multiprecision::cpp_int a, int b);
-
 private:
 
     std::vector<int> extract_keys(std::map<int, std::vector<std::string>> const& input_map);
