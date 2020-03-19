@@ -1,7 +1,7 @@
 #include <time.h>
+//#include <sys/time.h>
 #include <stdio.h>
 #include <string>
-#include <sys/time.h>
 #include <random>
 
 #include "enumerator.h"
@@ -12,7 +12,7 @@ using namespace std;
 namespace mp = boost::multiprecision;
 
 
-Enumerator::Enumerator(PrimitiveSet& primitiveSet)
+Enumerator::Enumerator(PrimitiveSet* primitiveSet)
     :    m_primitiveSet(primitiveSet)
 {
 }
@@ -29,6 +29,7 @@ std::vector<std::string> Enumerator::uniform_random_global_search_once(int n, in
 
 string Enumerator::uniform_random_global_search_once(int n)
 {
+    //printf("\nEnumerator::uniform_random_global_search_once begin\n");
     vector<int> weights = calculate_Q(n);
     double sum_of_weight = 0;
     for(int j=0; j<n; j++) {
@@ -40,35 +41,35 @@ string Enumerator::uniform_random_global_search_once(int n)
     }
 
     boost::mt19937 gen;
-    struct timeval time;
-    gettimeofday(&time,NULL);
+//    struct timeval time;
+//    gettimeofday(&time,NULL);
     // microsecond has 1 000 000
     // Assuming you did not need quite that accuracy
     // Also do not assume the system clock has that accuracy.
-    gen.seed((time.tv_sec * 1000) + (time.tv_usec / 1000));
+    gen.seed(std::time(0));
     boost::random::discrete_distribution<> weightdist( norm_weights.begin(), norm_weights.end() );
     int i = weightdist(gen);
     int r_i = calculate_R_i(i);
     int s_i = calculate_S_i(i);
-    boost::random::uniform_int_distribution<> r_dist( 0, r_i-1 );
-    boost::random::uniform_int_distribution<> s_dist( 0,s_i-1 );
+    boost::random::uniform_int_distribution<> r_dist( 0, r_i - 1 );
+    boost::random::uniform_int_distribution<> s_dist( 0, s_i - 1 );
     int r = r_dist(gen);
     int s = s_dist(gen);
     //    int i = 918;
     // int r = 27; int s = 31625;
-    printf("\ni: %d, r: %d, s: %d, n: %d\n",i,r,s,n);
+    //printf("\ni: %d, r: %d, s: %d, n: %d\n",i,r,s,n);
     string candidate_solution = generate_specified_solution( i, r, s, n );
     return candidate_solution;
 }
 
-int Enumerator::calculate_R_i(int i)
+int Enumerator::calculate_R_i( int i )
 {
     std::map<int, int>::iterator it = m_r_is.find(i);
     if( it != m_r_is.end())
     {
         return it->second;
     }
-    if( m_r_is.size() > i )
+    if( m_r_is.size() > i  )
     {
         return m_r_is[i];
     }
@@ -97,7 +98,7 @@ int Enumerator::calculate_S_i(int i)
     {
         return it->second;
     }
-    int m = m_primitiveSet.get_terminals().size();
+    int m = m_primitiveSet->get_terminals().size();
     int j_i = calculate_a_i(i);
     //TODO: remove usage of mempower and use pow instead,m and j_i have small values
     int s_i = pow(m, j_i);
@@ -131,18 +132,18 @@ vector<int> Enumerator::calculate_Q(int n)
 
 vector<int> Enumerator::calculate_all_G_i_b(int i)
 {
-     std::map<int, std::vector<int>>::iterator it = m_all_g_is.find(i);
-     if( it != m_all_g_is.end() )
-     {
-         return it->second;
-     }
+    std::map<int, std::vector<int>>::iterator it = m_all_g_is.find(i);
+    if( it != m_all_g_is.end() )
+    {
+     return it->second;
+    }
 
-    vector<int> arities = m_primitiveSet.get_arities();
+    vector<int> arities = m_primitiveSet->get_arities();
     int k = arities.size();
     vector<int> list_g_i_b;
     for(int b=0; b < k;b++)
     {
-        list_g_i_b.push_back(calculate_G_i_b(i,b));
+        list_g_i_b.push_back( calculate_G_i_b(i,b) );
     }
     m_all_g_is[i] = list_g_i_b;
     return list_g_i_b;
@@ -150,8 +151,8 @@ vector<int> Enumerator::calculate_all_G_i_b(int i)
 
 int Enumerator::calculate_G_i_b(int i, int b)
 {
-    vector<int> arities = m_primitiveSet.get_arities();
-    int f_b = m_primitiveSet.get_operators(arities[b]).size();
+    vector<int> arities = m_primitiveSet->get_arities();
+    int f_b = m_primitiveSet->get_operators(arities[b]).size();
     int l_i_b = calculate_l_i_b( i, b );
     int g_i_b = pow(f_b, l_i_b );
     return g_i_b;
@@ -159,7 +160,7 @@ int Enumerator::calculate_G_i_b(int i, int b)
 
 int Enumerator::calculate_l_i_b(int i, int b)
 {
-    vector<int> arities = m_primitiveSet.get_arities();
+    vector<int> arities = m_primitiveSet->get_arities();
     int k = arities.size();
     int l_i_b;
     if( i == 0 )
@@ -205,7 +206,7 @@ int Enumerator::calculate_l_i_b(int i, int b)
 
 int Enumerator::calculate_a_i(int i)
 {
-    vector<int> arities = m_primitiveSet.get_arities();
+    vector<int> arities = m_primitiveSet->get_arities();
     int k = arities.size();
     int a_i = 0;
     if( i == 0 )
@@ -269,20 +270,20 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
     }
 
     vector<vector<string>> operator_config;
-    vector<int> arities = m_primitiveSet.get_arities();
+    vector<int> arities = m_primitiveSet->get_arities();
     for(int b = 0; b < operator_config_indices.size(); b++ )
     {
         int z = operator_config_indices[b];
         int arity = arities[b];
         int l_i_b = calculate_l_i_b(i, b);
         vector<vector<string>> operators;
-        operators.push_back( m_primitiveSet.get_operators( arity ) );
+        operators.push_back( m_primitiveSet->get_operators( arity ) );
         vector<string> config = get_element_of_cartesian_product( operators, l_i_b, z );
         operator_config.push_back( config );
     }
     int a_i = calculate_a_i(i);
     vector<vector<string>> terminals;
-    terminals.push_back( m_primitiveSet.get_terminals() );
+    terminals.push_back( m_primitiveSet->get_terminals() );
     vector<string> terminal_config = get_element_of_cartesian_product( terminals, a_i, s );
 
     string workingTree = tree;
@@ -333,7 +334,7 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
 
 string Enumerator::ith_n_ary_tree(int i)
 {
-    vector<int> arities = m_primitiveSet.get_arities();
+    vector<int> arities = m_primitiveSet->get_arities();
     string tree ="";
     int k = arities.size();
     if( i == 0 )
@@ -478,17 +479,17 @@ vector<int> Enumerator::numberToBase(int n, int b)
 
 int Enumerator::base_m_to_decimal(int v, int m)
 {
-   string str_v = to_string(v);
-   const char* str = str_v.c_str();
-   int len = strlen(str);
-   int power = 1; // Initialize power of m
-   int num = 0;  // Initialize result
-   int i;
+    string str_v = to_string(v);
+    const char* str = str_v.c_str();
+    int len = strlen(str);
+    int power = 1; // Initialize power of m
+    int num = 0;  // Initialize result
+    int i;
 
-   // Decimal equivalent is str[len-1]*1 +
-   // str[len-1]*m + str[len-1]*(m^2) + ...
-   for (i = len - 1; i >= 0; i--)
-   {
+    // Decimal equivalent is str[len-1]*1 +
+    // str[len-1]*m + str[len-1]*(m^2) + ...
+    for (i = len - 1; i >= 0; i--)
+    {
        // A digit in input number must be
        // less than number's base
        if (numVal(str[i]) >= m)
@@ -499,8 +500,8 @@ int Enumerator::base_m_to_decimal(int v, int m)
 
        num += numVal(str[i]) * power;
        power = power * m;
-   }
-   return num;
+    }
+    return num;
 }
 
 int Enumerator::numVal(char c)
@@ -530,15 +531,15 @@ vector<int> Enumerator::deinterleave(vector<int> num, int m)
             elements[j].push_back(num[i+j]);
         }
     }
-   vector<int> elemsLin;
-   for(int i = 0; i < elements.size();i++)
-   {
+    vector<int> elemsLin;
+    for(int i = 0; i < elements.size();i++)
+    {
        elemsLin.push_back(0);
        for(int j=0; j < elements[i].size(); j++ )
        {
            elemsLin[i] += elements[i][j] * (pow(10,elements[i].size() - j - 1));
        }
-   }
+    }
     return elemsLin;
 }
 vector<string> Enumerator::get_element_of_cartesian_product(vector<vector<string>> pools,

@@ -8,7 +8,7 @@ PrimitiveSet::PrimitiveSet()
 
 }
 
-void PrimitiveSet::add_operator(const std::string& funct_name, int arity, const std::string& datatype/*="default"*/)
+void PrimitiveSet::add_operator(const string& funct_name, int arity, const std::string& datatype/*="default"*/)
 {
     if (arity < 1)
     {
@@ -17,7 +17,7 @@ void PrimitiveSet::add_operator(const std::string& funct_name, int arity, const 
     }
     m_operators_map[arity].push_back(funct_name);
 }
-void PrimitiveSet::add_variable(const std::string& variable, const std::string datatype/*="default"*/)
+void PrimitiveSet::add_variable(const string& variable, const std::string datatype/*="default"*/)
 {
     m_variables.push_back(variable);
 }

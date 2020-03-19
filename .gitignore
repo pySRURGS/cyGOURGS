@@ -3,3 +3,8 @@
 *.exe
 *.bak
 *.autosave
+*__pycache__*
+.idea
+build/
+*.pyd
+*.db

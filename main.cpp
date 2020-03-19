@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     ps.add_variable("ant.move_forward()");
     ps.add_variable("ant.turn_left()");
     ps.add_variable("ant.turn_right()");
-    Enumerator en(ps);
+    Enumerator en(&ps);
     vector<string> soln = en.uniform_random_global_search_once(1000,10);
     for( int i = 0; i < soln.size();i++ )
     {
