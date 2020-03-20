@@ -5,9 +5,8 @@ import numpy
 
 
 extensions = [
-    Extension('function_call', ['enumerator_call.pyx', 'enumerator_container.cpp', '../enumerator.cpp', '../primitiveset.cpp'],
+    Extension('cython_calls', ['cython_call.pyx', '../enumerator.cpp', '../primitiveset.cpp'],
               include_dirs=[numpy.get_include(), 'c:/boost/boost_1_72_0', '..'],
-              #extra_compile_args=['-I '],
               language='c++'
               ),
 ]

@@ -30,7 +30,7 @@ public:
 //    Returns
 //    -------
 //    None
-    void add_operator(const std::string& funct_name, int arity, const std::string& datatype="default");
+    void add_operator(const std::string& funct_name, int arity);
 
 //    A method that adds a user-specified variable to the list of terminals
 //    stored in self._variables.
@@ -47,7 +47,7 @@ public:
 //    Returns
 //    -------
 //    None
-    void add_variable(const std::string& variable, const std::string datatype="default");
+    void add_variable(const std::string& variable);
 
 //    A method that adds a fitting parameter to the list of terminals
 //    stored in self._fitting_parameters.

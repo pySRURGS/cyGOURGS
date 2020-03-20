@@ -14,7 +14,7 @@ sys.path.append(os.path.join('..', 'pyGOURGS'))
 import pyGOURGS as pg
 import argparse 
 from sqlitedict import SqliteDict
-from function_call import *
+from cython_calls import *
 import time
 start_time = time.time()
 
@@ -284,21 +284,22 @@ if __name__ == "__main__":
         else:
             raise Exception("Invalid value for exhaustive")
     elif cppimpl == True:
+        cset = PyPrimitiveSet()
+        cset.add_operator("ant.if_food_ahead", 2)
+        cset.add_operator("prog2", 2)
+        cset.add_operator("prog3", 3)
+        cset.add_variable("ant.move_forward()")
+        cset.add_variable("ant.turn_left()")
+        cset.add_variable("ant.turn_right()")
+        cenum = PyEnumerator(cset)
         if exhaustive == True:
             raise Exception("Cpp implementation for exhaustive True not available yet")
         elif exhaustive == False:
             if  multiproc == True:
                 raise Exception("Cpp implementation for exhaustive False mutiproc True not available yet")
             elif multiproc == False:
-                py_createEnumerator()
-                py_add_operator("ant.if_food_ahead", 2)
-                py_add_operator("prog2", 2)
-                py_add_operator("prog3", 3)
-                py_add_variable("ant.move_forward()")
-                py_add_variable("ant.turn_left()")
-                py_add_variable("ant.turn_right()")
                 for iter in range( 0, n_iters):
-                    soln = py_uniform_random_global_search_once(maximum_tree_complexity_index)
+                    soln = cenum.uniform_random_global_search_once(maximum_tree_complexity_index)
                     score = main(soln)[0]
                     #pg.save_result_to_db(output_db, score, soln)
                     if score > max_score:

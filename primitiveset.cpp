@@ -8,7 +8,7 @@ PrimitiveSet::PrimitiveSet()
 
 }
 
-void PrimitiveSet::add_operator(const string& funct_name, int arity, const std::string& datatype/*="default"*/)
+void PrimitiveSet::add_operator(const string& funct_name, int arity)
 {
     if (arity < 1)
     {
@@ -17,11 +17,11 @@ void PrimitiveSet::add_operator(const string& funct_name, int arity, const std::
     }
     m_operators_map[arity].push_back(funct_name);
 }
-void PrimitiveSet::add_variable(const string& variable, const std::string datatype/*="default"*/)
+void PrimitiveSet::add_variable( const string& variable )
 {
     m_variables.push_back(variable);
 }
-void PrimitiveSet::add_fitting_parameter( const std::string& fitting_parameter)
+void PrimitiveSet::add_fitting_parameter(const std::string& fitting_parameter)
 {
     m_fitting_parameters.push_back(fitting_parameter);
 }
