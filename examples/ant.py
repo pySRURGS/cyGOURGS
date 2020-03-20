@@ -14,7 +14,7 @@ sys.path.append(os.path.join('..', 'pyGOURGS'))
 import pyGOURGS as pg
 import argparse 
 from sqlitedict import SqliteDict
-from cython_calls import *
+import cython_calls as cy
 import time
 start_time = time.time()
 
@@ -214,99 +214,79 @@ if __name__ == "__main__":
     queue = manager.Queue()
     if cppimpl != True:
         pset = pg.PrimitiveSet()
-        pset.add_operator("ant.if_food_ahead", 2)
-        pset.add_operator("prog2", 2)
-        pset.add_operator("prog3", 3)
-        pset.add_variable("ant.move_forward()")
-        pset.add_variable("ant.turn_left()")
-        pset.add_variable("ant.turn_right()")
         enum = pg.Enumerator(pset)
-        if exhaustive == True:
-            _, weights = enum.calculate_Q(maximum_tree_complexity_index)
-            num_solns = int(numpy.sum(weights))
-            txt = input("The number of equations to be considered is " + 
-                        str(num_solns) + ", do you want to proceed?" + 
-                        " If yes, press 'c' then 'enter'.")
-            if txt != 'c':
-                print("You input: " + txt + ", exiting...")
-                exit(1)
-            if multiproc == True:
-                jobs = []
-                runner = mp.Process(target=solution_saving_worker, 
-                                 args=(queue, num_solns, output_db))
-                runner.start()
-                for soln in enum.exhaustive_global_search(
-                                                     maximum_tree_complexity_index):
-                    jobs.append(soln)
-                    iter = iter + 1
-                    print('\r' + "Progress: " + str(iter/num_solns), end='')
-                results = parmap.map(main_queue, jobs, queue=queue,
-                                     pm_pbar=True, pm_chunksize=3)
-                runner.join()
-            elif multiproc == False:
-                for soln in enum.exhaustive_global_search(
-                                                     maximum_tree_complexity_index):
-                    score = main(soln)[0]
-                    pg.save_result_to_db(output_db, score, soln)
-                    iter = iter + 1
-                    if score > max_score:
-                        max_score = score
-                    if iter % frequency_printing == 0:
-                        print("best score of this run:" + str(max_score), 
-                              'iteration:'+ str(iter), end='\r')
-            else:
-                raise Exception("Invalid value multiproc must be true/false")
-        elif exhaustive == False:
-            num_solns = n_iters
-            if multiproc == True:
-                seeds = list(range(0,n_iters))
-                runner = mp.Process(target=solution_saving_worker, 
-                                 args=(queue, num_solns, output_db))
-                runner.start()
-                results = parmap.map(main_rando_queue, seeds, enum=enum, 
-                                     max_tree_complx=maximum_tree_complexity_index, 
-                                     queue=queue, pm_pbar=True, pm_chunksize=3)
-                runner.join()
-            elif multiproc == False:
-                for soln in enum.uniform_random_global_search(
-                                                      maximum_tree_complexity_index, 
-                                                       n_iters, seed=deterministic):
-                    score = main(soln)[0]
-                    pg.save_result_to_db(output_db, score, soln)
-                    iter = iter + 1
-                    if score > max_score:
-                        max_score = score
-                    if iter % frequency_printing == 0:
-                        print("best score of this run:" + str(max_score), 
-                              'iteration:'+ str(iter), end='\r')
-            else:
-                raise Exception("Invalid multiproc, must be true/false")    
-        else:
-            raise Exception("Invalid value for exhaustive")
     elif cppimpl == True:
-        cset = PyPrimitiveSet()
-        cset.add_operator("ant.if_food_ahead", 2)
-        cset.add_operator("prog2", 2)
-        cset.add_operator("prog3", 3)
-        cset.add_variable("ant.move_forward()")
-        cset.add_variable("ant.turn_left()")
-        cset.add_variable("ant.turn_right()")
-        cenum = PyEnumerator(cset)
-        if exhaustive == True:
-            raise Exception("Cpp implementation for exhaustive True not available yet")
-        elif exhaustive == False:
-            if  multiproc == True:
-                raise Exception("Cpp implementation for exhaustive False mutiproc True not available yet")
-            elif multiproc == False:
-                for iter in range( 0, n_iters):
-                    soln = cenum.uniform_random_global_search_once(maximum_tree_complexity_index)
-                    score = main(soln)[0]
-                    #pg.save_result_to_db(output_db, score, soln)
-                    if score > max_score:
-                        max_score = score
-                    if iter % frequency_printing == 0:
-                        print("best score of this run:" + str(max_score),
-                              'iteration:'+ str(iter), end='\r')
+        pset = cy.CyPrimitiveSet()
+        enum = cy.CyEnumerator(pset)
+    pset.add_operator("ant.if_food_ahead", 2)
+    pset.add_operator("prog2", 2)
+    pset.add_operator("prog3", 3)
+    pset.add_variable("ant.move_forward()")
+    pset.add_variable("ant.turn_left()")
+    pset.add_variable("ant.turn_right()")
+
+    if exhaustive == True:
+        _, weights = enum.calculate_Q(maximum_tree_complexity_index)
+        num_solns = int(numpy.sum(weights))
+        txt = input("The number of equations to be considered is " +
+                    str(num_solns) + ", do you want to proceed?" +
+                    " If yes, press 'c' then 'enter'.")
+        if txt != 'c':
+            print("You input: " + txt + ", exiting...")
+            exit(1)
+        if multiproc == True:
+            jobs = []
+            runner = mp.Process(target=solution_saving_worker,
+                             args=(queue, num_solns, output_db))
+            runner.start()
+            for soln in enum.exhaustive_global_search(
+                                                 maximum_tree_complexity_index):
+                jobs.append(soln)
+                iter = iter + 1
+                print('\r' + "Progress: " + str(iter/num_solns), end='')
+            results = parmap.map(main_queue, jobs, queue=queue,
+                                 pm_pbar=True, pm_chunksize=3)
+            runner.join()
+        elif multiproc == False:
+            for soln in enum.exhaustive_global_search(
+                                                 maximum_tree_complexity_index):
+                score = main(soln)[0]
+                pg.save_result_to_db(output_db, score, soln)
+                iter = iter + 1
+                if score > max_score:
+                    max_score = score
+                if iter % frequency_printing == 0:
+                    print("best score of this run:" + str(max_score),
+                          'iteration:'+ str(iter), end='\r')
+        else:
+            raise Exception("Invalid value multiproc must be true/false")
+    elif exhaustive == False:
+        num_solns = n_iters
+        if multiproc == True:
+            seeds = list(range(0,n_iters))
+            runner = mp.Process(target=solution_saving_worker,
+                             args=(queue, num_solns, output_db))
+            runner.start()
+            results = parmap.map(main_rando_queue, seeds, enum=enum,
+                                 max_tree_complx=maximum_tree_complexity_index,
+                                 queue=queue, pm_pbar=True, pm_chunksize=3)
+            runner.join()
+        elif multiproc == False:
+            for soln in enum.uniform_random_global_search(
+                                                  maximum_tree_complexity_index,
+                                                   n_iters, seed=deterministic):
+                score = main(soln)[0]
+                pg.save_result_to_db(output_db, score, soln)
+                iter = iter + 1
+                if score > max_score:
+                    max_score = score
+                if iter % frequency_printing == 0:
+                    print("best score of this run:" + str(max_score),
+                          'iteration:'+ str(iter), end='\r')
+        else:
+            raise Exception("Invalid multiproc, must be true/false")
+    else:
+        raise Exception("Invalid value for exhaustive")
     totalTime = time.time() - start_time
     print("\nTotal time: ", totalTime)
     pg.ResultList(output_db)

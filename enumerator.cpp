@@ -17,7 +17,30 @@ Enumerator::Enumerator(PrimitiveSet* primitiveSet)
 {
 }
 
-std::vector<std::string> Enumerator::uniform_random_global_search_once(int n, int num_iters)
+std::vector<std::string> Enumerator::exhaustive_global_search(int n, int max_iters)
+{
+    int iters = 1;
+    vector<string> candidate_solutions;
+    for(int i = 0; i < n; i++)
+    {
+        int r_i = calculate_R_i(i);
+        int s_i = calculate_S_i(i);
+        for(int r=0;r<r_i;r++)
+        {
+            for(int s=0;s<s_i;s++)
+            {
+                candidate_solutions.push_back( generate_specified_solution( i, r, s, n ) );
+                if( max_iters > 0 && iters++ > max_iters )
+                {
+                    return candidate_solutions;
+                }
+            }
+        }
+    }
+    return candidate_solutions;
+}
+
+std::vector<std::string> Enumerator::uniform_random_global_search(int n, int num_iters)
 {
     vector<string> soln;
     for(int i=0;i<num_iters;i++)
@@ -106,9 +129,22 @@ int Enumerator::calculate_S_i(int i)
     return s_i;
 }
 
+int Enumerator::get_Q(int n)
+{
+    if( n > 1 )
+    {
+        if(  m_q.size() < n )
+        {
+            vector<int> res = calculate_Q(n);
+        }
+        return m_q[n-1];
+    }
+    return 0;
+}
+
 vector<int> Enumerator::calculate_Q(int n)
 {
-//    int q = 0;
+    int q = 0;
     int r_i;
     int s_i;
     int product;
@@ -121,9 +157,8 @@ vector<int> Enumerator::calculate_Q(int n)
         r_i = calculate_R_i(i);
         s_i = calculate_S_i(i);
         product = s_i * r_i;
-//        q is nerver used; Uncomment code if it is the case
-//        q+=product;
-//        m_q.push_back(q);
+        q+=product;
+        m_q.push_back(q);
         m_results_for_calculate_Q.push_back( product );
 
     }
