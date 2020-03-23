@@ -14,7 +14,7 @@ sys.path.append(os.path.join('..', 'pyGOURGS'))
 import pyGOURGS as pg
 import argparse 
 from sqlitedict import SqliteDict
-import cython_calls as cy
+import cython_call as cy
 import time
 start_time = time.time()
 

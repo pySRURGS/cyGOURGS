@@ -14,12 +14,17 @@ cdef class CyPrimitiveSet:
         self.thisptr = new PrimitiveSet()
     def __dealloc__(self):
         del self.thisptr
+    def rebuild(None):
+        p = CyPrimitiveSet()
+        return p
+    def __reduce__(self):
+        return (CyPrimitiveSet.rebuild, (None,))
     def add_operator(self, mystring, arity):
         mystring_ = mystring.encode('utf-8')
         self.thisptr.add_operator(mystring_, arity)
     def add_variable(self, mystring):
         mystring_ = mystring.encode('utf-8')
-        self.thisptr.add_variable(mystring_)         
+        self.thisptr.add_variable(mystring_)
 
 cdef extern from "enumerator.h":
     cdef cppclass Enumerator:
@@ -38,6 +43,11 @@ cdef class CyEnumerator:
         self.thisptr = new Enumerator(self.primitiveSet.thisptr)
     def __dealloc__(self):
         del self.thisptr
+    def rebuild(primitiveSet,None):
+        p = CyEnumerator(primitiveSet)
+        return p
+    def __reduce__(self):
+        return (CyEnumerator.rebuild, (self.primitiveSet,))
     def calculate_Q(self,n):
         weights = self.thisptr.calculate_Q(n)
         Q = self.thisptr.get_Q(n)
@@ -60,4 +70,5 @@ cdef class CyEnumerator:
         for i in range(0,v.size()):
             vcopy[i] = v[i].decode('utf-8')
         return vcopy
+
 
