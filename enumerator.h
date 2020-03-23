@@ -23,7 +23,7 @@ public:
     std::string ith_n_ary_tree(int i);
 
 private:
-    std::vector<std::string> get_element_of_cartesian_product(std::vector<std::vector<std::string>> pools,
+    std::vector<std::string> get_element_of_cartesian_product(std::vector<std::vector<std::string> > pools,
                                                     int repeat=1,
                                                     int index=0);
     int get_arity_of_term(int start_index, const std::string& tree);
@@ -38,7 +38,7 @@ private:
     PrimitiveSet*    m_primitiveSet;
     std::vector<int> m_results_for_calculate_Q;
     std::vector<int> m_q;
-    std::map<int, std::vector<int>> m_all_g_is;
+    std::map<int, std::vector<int> > m_all_g_is;
     std::map<int,int> m_s_is;
     std::map<int,int> m_r_is;
 };

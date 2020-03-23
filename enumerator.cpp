@@ -8,6 +8,18 @@
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/random/discrete_distribution.hpp"
 
+#include <sstream>
+
+namespace patch
+{
+    template < typename T > std::string to_string( const T& n )
+    {
+        std::ostringstream stm ;
+        stm << n ;
+        return stm.str() ;
+    }
+}
+
 using namespace std;
 namespace mp = boost::multiprecision;
 
@@ -167,7 +179,7 @@ vector<int> Enumerator::calculate_Q(int n)
 
 vector<int> Enumerator::calculate_all_G_i_b(int i)
 {
-    std::map<int, std::vector<int>>::iterator it = m_all_g_is.find(i);
+    std::map<int, std::vector<int> >::iterator it = m_all_g_is.find(i);
     if( it != m_all_g_is.end() )
     {
      return it->second;
@@ -304,20 +316,20 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
         operator_config_indices.push_back( 0 );
     }
 
-    vector<vector<string>> operator_config;
+    vector<vector<string> > operator_config;
     vector<int> arities = m_primitiveSet->get_arities();
     for(int b = 0; b < operator_config_indices.size(); b++ )
     {
         int z = operator_config_indices[b];
         int arity = arities[b];
         int l_i_b = calculate_l_i_b(i, b);
-        vector<vector<string>> operators;
+        vector<vector<string> > operators;
         operators.push_back( m_primitiveSet->get_operators( arity ) );
         vector<string> config = get_element_of_cartesian_product( operators, l_i_b, z );
         operator_config.push_back( config );
     }
     int a_i = calculate_a_i(i);
-    vector<vector<string>> terminals;
+    vector<vector<string> > terminals;
     terminals.push_back( m_primitiveSet->get_terminals() );
     vector<string> terminal_config = get_element_of_cartesian_product( terminals, a_i, s );
 
@@ -514,7 +526,7 @@ vector<int> Enumerator::numberToBase(int n, int b)
 
 int Enumerator::base_m_to_decimal(int v, int m)
 {
-    string str_v = to_string(v);
+    string str_v = patch::to_string(v);
     const char* str = str_v.c_str();
     int len = strlen(str);
     int power = 1; // Initialize power of m
@@ -549,7 +561,7 @@ int Enumerator::numVal(char c)
 
 vector<int> Enumerator::deinterleave(vector<int> num, int m)
 {
-    vector<vector<int>> elements;
+    vector<vector<int> > elements;
     for(int i = 0; i < m; i++ )
     {
         vector<int> empty;
@@ -577,11 +589,11 @@ vector<int> Enumerator::deinterleave(vector<int> num, int m)
     }
     return elemsLin;
 }
-vector<string> Enumerator::get_element_of_cartesian_product(vector<vector<string>> pools,
+vector<string> Enumerator::get_element_of_cartesian_product(vector<vector<string> > pools,
                                                 int repeat,
                                                 int index)
 {
-    vector<vector<string>> pools_temp;
+    vector<vector<string> > pools_temp;
     vector<string> ith_item;
 
     if( repeat == 0 || pools.size() == 0 )
