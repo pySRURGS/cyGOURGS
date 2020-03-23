@@ -146,7 +146,7 @@ def main_rando_queue(seed, enum, max_tree_complx, queue):
         and puts it in the queue 
         used for multiprocessing
     """
-    soln = enum.uniform_random_global_search_once(max_tree_complx, seed=seed)
+    soln = enum.uniform_random_global_search_once(max_tree_complx)
     score = evalArtificialAnt(soln)    
     queue.put([score, soln])
 
@@ -246,7 +246,7 @@ if __name__ == "__main__":
                 print('\r' + "Progress: " + str(iter/num_solns), end='')
             results = parmap.map(main_queue, jobs, queue=queue,
                                  pm_pbar=True, pm_chunksize=3)
-            runner.join()
+            runner.join(timeout=0.1)
         elif multiproc == False:
             for soln in enum.exhaustive_global_search(
                                                  maximum_tree_complexity_index):
