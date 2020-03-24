@@ -4,7 +4,7 @@ from libcpp.vector cimport vector
     
 cdef extern from "primitiveset.h":
     cdef cppclass PrimitiveSet:
-        PrimitiveSet()
+        PrimitiveSet() except +
         void add_operator(string, int)
         void add_variable(string)
       
@@ -25,7 +25,7 @@ cdef class CyPrimitiveSet:
 
 cdef extern from "enumerator.h":
     cdef cppclass Enumerator:
-        Enumerator()
+        Enumerator() except +
         void init(PrimitiveSet)
         int get_Q(int)
         vector[int] calculate_Q(int)
