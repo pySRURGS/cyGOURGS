@@ -7,6 +7,8 @@ import cython_call as cy
 import pyGOURGS as pg
 import pickle
 
+# IN ORDER TO RUN AGAINST PYTHON, SET TO FALSE
+# IN ORDER TO RUN AGAINST C++, SET TO TRUE
 cppimpl = False
 
 if cppimpl != True:
