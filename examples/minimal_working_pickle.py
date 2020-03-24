@@ -9,6 +9,11 @@ import pickle
 
 # IN ORDER TO RUN AGAINST PYTHON, SET TO FALSE
 # IN ORDER TO RUN AGAINST C++, SET TO TRUE
+
+if cppimpl == True:
+    print("Ran in c++ mode")
+else:
+    print("Ran in python mode")
 cppimpl = False
 
 if cppimpl != True:
@@ -55,8 +60,4 @@ if cppimpl == False:
 else:
     assert(type(enum.primitiveSet) == type(pset))
 
-if cppimpl == True:
-    print("Ran in c++ mode")
-else:
-    print("Ran in python mode")
 print("Passed all tests")
