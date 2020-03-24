@@ -3,7 +3,7 @@
 import numpy as np
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-
+from libcpp.map cimport map
 
 cdef extern from "primitiveset.h":
     # Declare a c++ class interface for primitiveset
@@ -11,12 +11,15 @@ cdef extern from "primitiveset.h":
         PrimitiveSet() except +
         void add_operator(string, int)
         void add_variable(string)
-
-
+        vector[int] get_arities()
+        vector[string] get_operators(int)
+        vector[string] m_variables;
+        vector[string] m_fitting_parameters;
+        map[int, vector[string]] m_operators_map;
+        
 def rebuild_primitiveset():
     p = CyPrimitiveSet
-    return p
-        
+    return p        
 
 cdef class CyPrimitiveSet:
     # Create Cython wrapper class for primitiveset
@@ -37,7 +40,13 @@ cdef class CyPrimitiveSet:
         mystring_ = mystring.encode('utf-8')
         self.primitiveSet.add_variable(mystring_)
 
+    def get_arities(self):
+        return self.primitiveSet.get_arities()
 
+    def get_operators(self, arity):
+        return self.primitiveSet.get_operators(arity)
+        
+               
 cdef extern from "enumerator.h":
     # Declare a c++ class interface for enumerator
     cdef cppclass Enumerator:
