@@ -17,14 +17,17 @@ void PrimitiveSet::add_operator(const string& funct_name, int arity)
     }
     m_operators_map[arity].push_back(funct_name);
 }
-void PrimitiveSet::add_variable( const string& variable )
+
+void PrimitiveSet::add_variable(const string& variable)
 {
     m_variables.push_back(variable);
 }
+
 void PrimitiveSet::add_fitting_parameter(const std::string& fitting_parameter)
 {
     m_fitting_parameters.push_back(fitting_parameter);
 }
+
 std::vector<std::string> PrimitiveSet::get_terminals()
 {
     vector<string> terminals;
@@ -51,7 +54,9 @@ std::vector<std::string> PrimitiveSet::get_operators(int arity)
     return m_operators_map[arity];
 }
 
-vector<int> PrimitiveSet::extract_keys(map<int, vector<string>> const& input_map){
+vector<int> PrimitiveSet::extract_keys(
+                                      map<int, vector<string>> const& input_map)
+{
     /*
     Returns all the keys in a mapping of integers to vector<strings>
     */

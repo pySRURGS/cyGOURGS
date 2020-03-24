@@ -1,6 +1,5 @@
 #ifndef ENUMERATOR_H
 #define ENUMERATOR_H
-
 #include "primitiveset.h"
 
 class Enumerator
@@ -8,8 +7,10 @@ class Enumerator
 public:
 
     void init(PrimitiveSet primitiveSet);
-    std::vector<std::string> exhaustive_global_search( int n, int max_iters = 0 );
-    std::vector<std::string> uniform_random_global_search( int n, int num_iters, std::vector<long> seeds );
+    std::vector<std::string> exhaustive_global_search(int n, 
+                                                       int max_iters = 0);
+    std::vector<std::string> uniform_random_global_search(int n, int num_iters, 
+                                                      std::vector<long> seeds);
     std::string uniform_random_global_search_once(int n, long seed = 0);
     int calculate_R_i(int i);
     int calculate_S_i(int i);
@@ -23,16 +24,17 @@ public:
     std::string ith_n_ary_tree(int i);
 
 private:
-    std::vector<std::string> get_element_of_cartesian_product(std::vector<std::vector<std::string> > pools,
-                                                    int repeat=1,
-                                                    int index=0);
+    std::vector<std::string> get_element_of_cartesian_product(std::vector<
+                                               std::vector<std::string> > pools,
+                                               int repeat=1, int index=0);
     int get_arity_of_term(int start_index, const std::string& tree);
     std::vector<int> decimal_to_base_m(int decimal, int m);
     std::vector<int> numberToBase(int n,int b);
     int base_m_to_decimal(int v, int m);
     int numVal(char c);
     std::vector<int> deinterleave(std::vector<int> num, int n);
-    int findOccurenciesCount(const std::string& data, const std::string& toSearch);
+    int findOccurenciesCount(const std::string& data, 
+                             const std::string& toSearch);
 
 private:
     PrimitiveSet    m_primitiveSet;

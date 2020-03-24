@@ -13,7 +13,7 @@
 
 namespace patch
 {
-    template < typename T > std::string to_string( const T& n )
+    template < typename T > std::string to_string(const T& n)
     {
         std::ostringstream stm ;
         stm << n ;
@@ -31,7 +31,8 @@ void Enumerator::init(PrimitiveSet primitiveSet)
     m_primitiveSet = primitiveSet;
 }
 
-std::vector<std::string> Enumerator::exhaustive_global_search(int n, int max_iters)
+std::vector<std::string> Enumerator::exhaustive_global_search(int n, 
+                                                              int max_iters)
 {
     int iters = 1;
     vector<string> candidate_solutions;
@@ -43,8 +44,9 @@ std::vector<std::string> Enumerator::exhaustive_global_search(int n, int max_ite
         {
             for(int s=0;s<s_i;s++)
             {
-                candidate_solutions.push_back( generate_specified_solution( i, r, s, n ) );
-                if( max_iters > 0 && iters++ > max_iters )
+                candidate_solutions.push_back(generate_specified_solution(i, 
+                                                                    r, s, n));
+                if(max_iters > 0 && iters++ > max_iters)
                 {
                     return candidate_solutions;
                 }
@@ -54,70 +56,74 @@ std::vector<std::string> Enumerator::exhaustive_global_search(int n, int max_ite
     return candidate_solutions;
 }
 
-std::vector<std::string> Enumerator::uniform_random_global_search(int n, int num_iters, std::vector<long> seeds)
+std::vector<std::string> Enumerator::uniform_random_global_search(int n, 
+                                                                  int num_iters, 
+                                                        std::vector<long> seeds)
 {
     vector<string> soln;
-    if( seeds.size() > 0 && num_iters != seeds.size() )
+    if(seeds.size() > 0 && num_iters != seeds.size())
     {
-        cerr << "Enumerator::uniform_random_global_search: invalid seeds number" << endl;
+        cerr << "Enumerator::uniform_random_global_search: invalid seeds number" 
+                                                                        << endl;
         return soln;
     }
     for(int i=0;i<num_iters;i++)
     {
-        if(seeds.size() > 0 )
-            soln.push_back( uniform_random_global_search_once( n, seeds[i] ) );
+        if(seeds.size() > 0)
+            soln.push_back(uniform_random_global_search_once(n, seeds[i]));
         else
-            soln.push_back( uniform_random_global_search_once( n ) );
+            soln.push_back(uniform_random_global_search_once(n));
     }
     return soln;
 }
 
-string Enumerator::uniform_random_global_search_once(int n, long seed )
+string Enumerator::uniform_random_global_search_once(int n, long seed)
 {
     //printf("\nEnumerator::uniform_random_global_search_once begin\n");
-    vector<int> weights = calculate_Q( n );
+    vector<int> weights = calculate_Q(n);
     double sum_of_weight = 0;
     for(int j=0; j<n; j++) {
        sum_of_weight += weights[j];
     }
     vector<double> norm_weights;
     for(int j=0; j<n; j++) {
-       norm_weights.push_back( weights[j] / sum_of_weight );
+       norm_weights.push_back(weights[j] / sum_of_weight);
     }
 
     boost::mt19937 gen;
-    if( seed > 0)
+    if(seed > 0)
     {
-        gen.seed( seed );
+        gen.seed(seed);
     }
 
-    boost::random::discrete_distribution<> weightdist( norm_weights.begin(), norm_weights.end() );
+    boost::random::discrete_distribution<> weightdist(norm_weights.begin(), 
+                                                            norm_weights.end());
     int i = weightdist(gen);
     int r_i = calculate_R_i(i);
     int s_i = calculate_S_i(i);
-    boost::random::uniform_int_distribution<> r_dist( 0, r_i - 1 );
-    boost::random::uniform_int_distribution<> s_dist( 0, s_i - 1 );
+    boost::random::uniform_int_distribution<> r_dist(0, r_i - 1);
+    boost::random::uniform_int_distribution<> s_dist(0, s_i - 1);
     int r = r_dist(gen);
     int s = s_dist(gen);
     //    int i = 918;
     // int r = 27; int s = 31625;
     //printf("\ni: %d, r: %d, s: %d, n: %d\n",i,r,s,n);
-    string candidate_solution = generate_specified_solution( i, r, s, n );
+    string candidate_solution = generate_specified_solution(i, r, s, n);
     return candidate_solution;
 }
 
-int Enumerator::calculate_R_i( int i )
+int Enumerator::calculate_R_i(int i)
 {
     std::map<int, int>::iterator it = m_r_is.find(i);
-    if( it != m_r_is.end())
+    if(it != m_r_is.end())
     {
         return it->second;
     }
-    if( m_r_is.size() > i  )
+    if(m_r_is.size() > i )
     {
         return m_r_is[i];
     }
-    if ( i == 0 )
+    if (i == 0)
     {
         return 1;
     }
@@ -126,7 +132,7 @@ int Enumerator::calculate_R_i( int i )
     for(int ii = 0; ii < all_G_i_b.size(); ii++)
     {
         int g_i_b = all_G_i_b[ii];
-        if( g_i_b != 0 )
+        if(g_i_b != 0)
         {
             r_i = r_i * g_i_b;
         }
@@ -138,13 +144,14 @@ int Enumerator::calculate_R_i( int i )
 int Enumerator::calculate_S_i(int i)
 {
     std::map<int, int>::iterator it = m_s_is.find(i);
-    if( it != m_s_is.end() )
+    if(it != m_s_is.end())
     {
         return it->second;
     }
     int m = m_primitiveSet.get_terminals().size();
     int j_i = calculate_a_i(i);
-    //TODO: remove usage of mempower and use pow instead,m and j_i have small values
+    //TODO: remove usage of mempower and use pow instead, m and j_i have 
+    // small values
     int s_i = pow(m, j_i);
     m_s_is[i] = s_i;
     return s_i;
@@ -152,9 +159,9 @@ int Enumerator::calculate_S_i(int i)
 
 int Enumerator::get_Q(int n)
 {
-    if( n > 1 )
+    if(n > 1)
     {
-        if(  m_q.size() < n )
+        if( m_q.size() < n)
         {
             vector<int> res = calculate_Q(n);
         }
@@ -169,7 +176,7 @@ vector<int> Enumerator::calculate_Q(int n)
     int r_i;
     int s_i;
     int product;
-    if( n < m_results_for_calculate_Q.size())
+    if(n < m_results_for_calculate_Q.size())
     {
         return m_results_for_calculate_Q;
     }
@@ -180,7 +187,7 @@ vector<int> Enumerator::calculate_Q(int n)
         product = s_i * r_i;
         q+=product;
         m_q.push_back(q);
-        m_results_for_calculate_Q.push_back( product );
+        m_results_for_calculate_Q.push_back(product);
 
     }
     return m_results_for_calculate_Q;
@@ -189,7 +196,7 @@ vector<int> Enumerator::calculate_Q(int n)
 vector<int> Enumerator::calculate_all_G_i_b(int i)
 {
     std::map<int, std::vector<int> >::iterator it = m_all_g_is.find(i);
-    if( it != m_all_g_is.end() )
+    if(it != m_all_g_is.end())
     {
      return it->second;
     }
@@ -199,7 +206,7 @@ vector<int> Enumerator::calculate_all_G_i_b(int i)
     vector<int> list_g_i_b;
     for(int b=0; b < k;b++)
     {
-        list_g_i_b.push_back( calculate_G_i_b(i,b) );
+        list_g_i_b.push_back(calculate_G_i_b(i,b));
     }
     m_all_g_is[i] = list_g_i_b;
     return list_g_i_b;
@@ -209,8 +216,8 @@ int Enumerator::calculate_G_i_b(int i, int b)
 {
     vector<int> arities = m_primitiveSet.get_arities();
     int f_b = m_primitiveSet.get_operators(arities[b]).size();
-    int l_i_b = calculate_l_i_b( i, b );
-    int g_i_b = pow(f_b, l_i_b );
+    int l_i_b = calculate_l_i_b(i, b);
+    int g_i_b = pow(f_b, l_i_b);
     return g_i_b;
 }
 
@@ -219,13 +226,13 @@ int Enumerator::calculate_l_i_b(int i, int b)
     vector<int> arities = m_primitiveSet.get_arities();
     int k = arities.size();
     int l_i_b;
-    if( i == 0 )
+    if(i == 0)
     {
         l_i_b = 0;
     }
-    else if ( 1 <= i && i <= k )
+    else if (1 <= i && i <= k)
     {
-        if( b == i - 1 )
+        if(b == i - 1)
         {
             l_i_b = 1;
         }
@@ -240,7 +247,7 @@ int Enumerator::calculate_l_i_b(int i, int b)
         int e = (i - 1) / k;
         int j = (i - 1) % k;
         int m = arities[j];
-        if ( m == arities[b] )
+        if (m == arities[b])
         {
             l_i_b += 1;
         }
@@ -254,7 +261,7 @@ int Enumerator::calculate_l_i_b(int i, int b)
         for(int ii = 0; ii < list_bits_deci.size(); ii++)
         {
             int i_deinterleave = list_bits_deci[ii];
-            l_i_b += calculate_l_i_b(i_deinterleave, b );
+            l_i_b += calculate_l_i_b(i_deinterleave, b);
         }
     }
     return l_i_b;
@@ -265,11 +272,11 @@ int Enumerator::calculate_a_i(int i)
     vector<int> arities = m_primitiveSet.get_arities();
     int k = arities.size();
     int a_i = 0;
-    if( i == 0 )
+    if(i == 0)
     {
         a_i = 1;
     }
-    else if ( 1 <= i && i <= k )
+    else if (1 <= i && i <= k)
     {
         a_i = arities[i-1];
     }
@@ -298,19 +305,22 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
 {
     int r_i = calculate_R_i(i);
     int s_i = calculate_S_i(i);
-    if ( ( r >= r_i ) || ( r < 0 ) )
+    if ((r >= r_i) || (r < 0))
     {
-        cerr << "Enumerator::generate_specified_solution: invalid operator" << endl;
+        cerr << "Enumerator::generate_specified_solution: invalid operator" 
+                                                                        << endl;
         return "";
     }
-    if( ( s >= s_i )  || ( s < 0 ) )
+    if((s >= s_i)  || (s < 0))
     {
-        cerr << "Enumerator::generate_specified_solution InvalidTreeIndex" << endl;
+        cerr << "Enumerator::generate_specified_solution InvalidTreeIndex" 
+                                                                        << endl;
         return "";
     }
-    if ( i > n )
+    if (i > n)
     {
-        cerr << "Enumerator::generate_specified_solution InvalidTreeIndex" << endl;
+        cerr << "Enumerator::generate_specified_solution InvalidTreeIndex" 
+                                                                        << endl;
         return "";
     }
     string tree = "";
@@ -318,71 +328,77 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
     vector<int> g_i_b_values = calculate_all_G_i_b(i);
     vector<int> operator_config_indices;
 
-    //equivalent of python unravel_index ( value, list )
-    operator_config_indices.push_back( r );
-    for(int ii = 1; ii < g_i_b_values.size(); ii++ )
+    //equivalent of python unravel_index (value, list)
+    operator_config_indices.push_back(r);
+    for(int ii = 1; ii < g_i_b_values.size(); ii++)
     {
-        operator_config_indices.push_back( 0 );
+        operator_config_indices.push_back(0);
     }
 
     vector<vector<string>> operator_config;
     vector<int> arities = m_primitiveSet.get_arities();
-    for(int b = 0; b < operator_config_indices.size(); b++ )
+    for(int b = 0; b < operator_config_indices.size(); b++)
     {
         int z = operator_config_indices[b];
         int arity = arities[b];
         int l_i_b = calculate_l_i_b(i, b);
         vector<vector<string> > operators;
-        operators.push_back( m_primitiveSet.get_operators( arity ) );
-        vector<string> config = get_element_of_cartesian_product( operators, l_i_b, z );
-        operator_config.push_back( config );
+        operators.push_back(m_primitiveSet.get_operators(arity));
+        vector<string> config = get_element_of_cartesian_product(operators, 
+                                                                     l_i_b, z);
+        operator_config.push_back(config);
     }
     int a_i = calculate_a_i(i);
     vector<vector<string>> terminals;
-    terminals.push_back( m_primitiveSet.get_terminals() );
-    vector<string> terminal_config = get_element_of_cartesian_product( terminals, a_i, s );
+    terminals.push_back(m_primitiveSet.get_terminals());
+    vector<string> terminal_config = get_element_of_cartesian_product(terminals, 
+                                                                        a_i, s);
 
     string workingTree = tree;
     string tempTree;
-    int num_opers = std::count( tree.begin(), tree.end(), '[' );
+    int num_opers = std::count(tree.begin(), tree.end(), '[');
     int start_index = -1;
-    for( int ii = 0; ii < num_opers ; ii++ )
+    for(int ii = 0; ii < num_opers ; ii++)
     {
         start_index = workingTree.find("[", start_index+1);
-        int arity = get_arity_of_term( start_index, workingTree );
+        int arity = get_arity_of_term(start_index, workingTree);
         int index = -1;
-        for( int jj = 0; jj < arities.size(); jj++ )
+        for(int jj = 0; jj < arities.size(); jj++)
         {
-            if( arities[jj] == arity )
+            if(arities[jj] == arity)
             {
                 index = jj;
                 break;
             }
         }
-        if( index == -1 )
+        if(index == -1)
         {
             continue;
         }
         vector<string> operator_config_vector = operator_config[index];
-        string my_operator = operator_config_vector[operator_config_vector.size()-1];
+        string my_operator = operator_config_vector[
+                                               operator_config_vector.size()-1];
         operator_config[index].pop_back();
-        tempTree = workingTree.substr(0, start_index );
-        tempTree.append(my_operator); tempTree.append("("); tempTree.append(workingTree.substr(start_index+1,workingTree.length() - start_index - 1 ));
+        tempTree = workingTree.substr(0, start_index);
+        tempTree.append(my_operator); tempTree.append("("); 
+        tempTree.append(workingTree.substr(start_index+1, 
+                                      workingTree.length() - start_index - 1));
         workingTree = tempTree;
         start_index += my_operator.size();
     }
-    boost::replace_all( workingTree, "]", ")" );
-    int num_terminals = findOccurenciesCount( workingTree, ".." );
-    if ( num_terminals != terminal_config.size() )
+    boost::replace_all(workingTree, "]", ")");
+    int num_terminals = findOccurenciesCount(workingTree, "..");
+    if (num_terminals != terminal_config.size())
     {
-        cerr << "Occurencies of '..' should have the same count with terminal_config vector" << endl;
+        cerr << "Count of '..' must equal length of terminal_config vector" 
+                                                                        << endl;
         throw 2;
     }
-    for( int ii = 0; ii < num_terminals; ii++)
+    for(int ii = 0; ii < num_terminals; ii++)
     {
         string terminal = terminal_config[terminal_config.size()-1];
         terminal_config.pop_back();
-        boost::replace_first( workingTree, "..", terminal );
+        boost::replace_first(workingTree, "..", terminal);
     }
     tree = workingTree;
     return tree;
@@ -393,11 +409,11 @@ string Enumerator::ith_n_ary_tree(int i)
     vector<int> arities = m_primitiveSet.get_arities();
     string tree ="";
     int k = arities.size();
-    if( i == 0 )
+    if(i == 0)
     {
         tree = "..";
     }
-    else if ( 1 <=i && i <= k )
+    else if (1 <=i && i <= k)
     {
         tree = "[";
         int m = arities[i-1];
@@ -430,7 +446,7 @@ string Enumerator::ith_n_ary_tree(int i)
         for(int j = 0; j < subtrees.size(); j++)
         {
             tree.append(subtrees[j]);
-            if( j < subtrees.size() - 1)
+            if(j < subtrees.size() - 1)
             {
                tree.append(",");
             }
@@ -457,7 +473,7 @@ int Enumerator::get_arity_of_term(int start_index, const string& tree){
     */
     int bracket_counter = 0;
     int arity = 1;
-    if (tree.c_str()[start_index] != '[' )
+    if (tree.c_str()[start_index] != '[')
     {
         cerr << "Start index must point to a square bracket";
         throw 2;
@@ -465,7 +481,7 @@ int Enumerator::get_arity_of_term(int start_index, const string& tree){
     int len_solution = tree.length();
     for (int i=start_index; i<len_solution; i++)
     {
-        if ( tree.c_str()[i] == '[' )
+        if (tree.c_str()[i] == '[')
         {
             bracket_counter = bracket_counter + 1;
         }
@@ -488,7 +504,7 @@ int Enumerator::get_arity_of_term(int start_index, const string& tree){
 vector<int> Enumerator::decimal_to_base_m(int v, int m)
 {
     vector<int> result;
-    if( v < 0 )
+    if(v < 0)
     {
         cerr << "decimal_to_base_m: Do not supply negative values" << endl;
         return result;
@@ -500,12 +516,12 @@ vector<int> Enumerator::decimal_to_base_m(int v, int m)
     }
     if (m == 1)
     {
-        for( int i = 0; i < v; i++ )
+        for(int i = 0; i < v; i++)
         {
             result.push_back(1);
         }
     }
-    else if( m >= 2 )
+    else if(m >= 2)
     {
         result = numberToBase(v, m);
     }
@@ -524,7 +540,7 @@ vector<int> Enumerator::numberToBase(int n, int b)
         digits.push_back(0);
         return digits;
     }
-    while ( n != 0 )
+    while (n != 0)
     {
         digits.push_back(n % b);
         n /= b;
@@ -571,12 +587,12 @@ int Enumerator::numVal(char c)
 vector<int> Enumerator::deinterleave(vector<int> num, int m)
 {
     vector<vector<int> > elements;
-    for(int i = 0; i < m; i++ )
+    for(int i = 0; i < m; i++)
     {
         vector<int> empty;
         elements.push_back(empty);
     }
-    while( ( num.size() % m ) != 0)
+    while((num.size() % m) != 0)
     {
         num.insert(num.begin(), 0);
     }
@@ -591,21 +607,22 @@ vector<int> Enumerator::deinterleave(vector<int> num, int m)
     for(int i = 0; i < elements.size();i++)
     {
        elemsLin.push_back(0);
-       for(int j=0; j < elements[i].size(); j++ )
+       for(int j=0; j < elements[i].size(); j++)
        {
            elemsLin[i] += elements[i][j] * (pow(10,elements[i].size() - j - 1));
        }
     }
     return elemsLin;
 }
-vector<string> Enumerator::get_element_of_cartesian_product(vector<vector<string> > pools,
+vector<string> Enumerator::get_element_of_cartesian_product(
+                                                vector<vector<string> > pools,
                                                 int repeat,
                                                 int index)
 {
     vector<vector<string> > pools_temp;
     vector<string> ith_item;
 
-    if( repeat == 0 || pools.size() == 0 )
+    if(repeat == 0 || pools.size() == 0)
     {
         return ith_item;
     }
@@ -648,18 +665,19 @@ vector<string> Enumerator::get_element_of_cartesian_product(vector<vector<string
     return ith_item;
 }
 
-int Enumerator::findOccurenciesCount(const std::string& data, const std::string& toSearch)
+int Enumerator::findOccurenciesCount(const std::string& data, 
+                                     const std::string& toSearch)
 {
     // Get the first occurrence
     int count = 0;
-    size_t pos = data.find( toSearch );
+    size_t pos = data.find(toSearch);
 
     // Repeat till end is reached
-    while( pos != std::string::npos )
+    while(pos != std::string::npos)
     {
         count++;
         // Get the next occurrence from the current position
-        pos = data.find( toSearch, pos + toSearch.size() );
+        pos = data.find(toSearch, pos + toSearch.size());
     }
     return count;
 }

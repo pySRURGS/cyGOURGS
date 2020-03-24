@@ -88,7 +88,8 @@ public:
     std::vector<std::string> get_operators(int arity);
 private:
 
-    std::vector<int> extract_keys(std::map<int, std::vector<std::string> > const& input_map);
+    std::vector<int> extract_keys(
+                     std::map<int, std::vector<std::string> > const& input_map);
 
 private:
     std::vector<std::string> m_variables;

@@ -23,8 +23,8 @@ int main(int argc, char *argv[])
     {
         seeds.push_back(i);
     }
-    vector<string> soln = en.uniform_random_global_search(1000,iters, seeds);
-    for( int i = 0; i < soln.size();i++ )
+    vector<string> soln = en.uniform_random_global_search(1000, iters, seeds);
+    for( int i = 0; i < soln.size(); i++ )
     {
         printf("\nSolution no: %d\n %s\n", i , soln[i].c_str());
     }
