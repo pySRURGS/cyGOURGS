@@ -6,8 +6,8 @@
 class Enumerator
 {
 public:
-    Enumerator(PrimitiveSet* primitiveSet);
 
+    void init(PrimitiveSet primitiveSet);
     std::vector<std::string> exhaustive_global_search(int n, int max_iters = 0);
     std::vector<std::string> uniform_random_global_search(int n, int num_iters);
     std::string uniform_random_global_search_once(int n);
@@ -35,7 +35,7 @@ private:
     int findOccurenciesCount(const std::string& data, const std::string& toSearch);
 
 private:
-    PrimitiveSet*    m_primitiveSet;
+    PrimitiveSet    m_primitiveSet;
     std::vector<int> m_results_for_calculate_Q;
     std::vector<int> m_q;
     std::map<int, std::vector<int> > m_all_g_is;

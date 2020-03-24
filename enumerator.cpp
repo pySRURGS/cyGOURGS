@@ -24,9 +24,9 @@ using namespace std;
 namespace mp = boost::multiprecision;
 
 
-Enumerator::Enumerator(PrimitiveSet* primitiveSet)
-    :    m_primitiveSet(primitiveSet)
+void Enumerator::init(PrimitiveSet primitiveSet)
 {
+    m_primitiveSet = primitiveSet;
 }
 
 std::vector<std::string> Enumerator::exhaustive_global_search(int n, int max_iters)
@@ -133,7 +133,7 @@ int Enumerator::calculate_S_i(int i)
     {
         return it->second;
     }
-    int m = m_primitiveSet->get_terminals().size();
+    int m = m_primitiveSet.get_terminals().size();
     int j_i = calculate_a_i(i);
     //TODO: remove usage of mempower and use pow instead,m and j_i have small values
     int s_i = pow(m, j_i);
@@ -185,7 +185,7 @@ vector<int> Enumerator::calculate_all_G_i_b(int i)
      return it->second;
     }
 
-    vector<int> arities = m_primitiveSet->get_arities();
+    vector<int> arities = m_primitiveSet.get_arities();
     int k = arities.size();
     vector<int> list_g_i_b;
     for(int b=0; b < k;b++)
@@ -198,8 +198,8 @@ vector<int> Enumerator::calculate_all_G_i_b(int i)
 
 int Enumerator::calculate_G_i_b(int i, int b)
 {
-    vector<int> arities = m_primitiveSet->get_arities();
-    int f_b = m_primitiveSet->get_operators(arities[b]).size();
+    vector<int> arities = m_primitiveSet.get_arities();
+    int f_b = m_primitiveSet.get_operators(arities[b]).size();
     int l_i_b = calculate_l_i_b( i, b );
     int g_i_b = pow(f_b, l_i_b );
     return g_i_b;
@@ -207,7 +207,7 @@ int Enumerator::calculate_G_i_b(int i, int b)
 
 int Enumerator::calculate_l_i_b(int i, int b)
 {
-    vector<int> arities = m_primitiveSet->get_arities();
+    vector<int> arities = m_primitiveSet.get_arities();
     int k = arities.size();
     int l_i_b;
     if( i == 0 )
@@ -253,7 +253,7 @@ int Enumerator::calculate_l_i_b(int i, int b)
 
 int Enumerator::calculate_a_i(int i)
 {
-    vector<int> arities = m_primitiveSet->get_arities();
+    vector<int> arities = m_primitiveSet.get_arities();
     int k = arities.size();
     int a_i = 0;
     if( i == 0 )
@@ -316,21 +316,21 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
         operator_config_indices.push_back( 0 );
     }
 
-    vector<vector<string> > operator_config;
-    vector<int> arities = m_primitiveSet->get_arities();
+    vector<vector<string>> operator_config;
+    vector<int> arities = m_primitiveSet.get_arities();
     for(int b = 0; b < operator_config_indices.size(); b++ )
     {
         int z = operator_config_indices[b];
         int arity = arities[b];
         int l_i_b = calculate_l_i_b(i, b);
         vector<vector<string> > operators;
-        operators.push_back( m_primitiveSet->get_operators( arity ) );
+        operators.push_back( m_primitiveSet.get_operators( arity ) );
         vector<string> config = get_element_of_cartesian_product( operators, l_i_b, z );
         operator_config.push_back( config );
     }
     int a_i = calculate_a_i(i);
-    vector<vector<string> > terminals;
-    terminals.push_back( m_primitiveSet->get_terminals() );
+    vector<vector<string>> terminals;
+    terminals.push_back( m_primitiveSet.get_terminals() );
     vector<string> terminal_config = get_element_of_cartesian_product( terminals, a_i, s );
 
     string workingTree = tree;
@@ -381,7 +381,7 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
 
 string Enumerator::ith_n_ary_tree(int i)
 {
-    vector<int> arities = m_primitiveSet->get_arities();
+    vector<int> arities = m_primitiveSet.get_arities();
     string tree ="";
     int k = arities.size();
     if( i == 0 )

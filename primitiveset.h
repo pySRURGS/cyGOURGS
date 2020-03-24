@@ -60,7 +60,7 @@ public:
 //    Returns
 //    -------
 //    None
-    void add_fitting_parameter( const std::string& fitting_parameter);
+    void add_fitting_parameter( const std::string& fitting_parameter );
 
 
 //    A method that returns the fitting parameters and variables as one list.

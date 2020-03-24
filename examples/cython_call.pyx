@@ -9,26 +9,24 @@ cdef extern from "primitiveset.h":
         void add_variable(string)
       
 cdef class CyPrimitiveSet:
-    cdef PrimitiveSet *thisptr
-    def __cinit__(self):
-        self.thisptr = new PrimitiveSet()
-    def __dealloc__(self):
-        del self.thisptr
-    def rebuild(None):
+    cdef PrimitiveSet primitiveSet
+    def rebuild(prim):
         p = CyPrimitiveSet()
+        p.primitiveSet = prim.primitiveSet
         return p
     def __reduce__(self):
-        return (CyPrimitiveSet.rebuild, (None,))
+        return (CyPrimitiveSet.rebuild, (self,))
     def add_operator(self, mystring, arity):
         mystring_ = mystring.encode('utf-8')
-        self.thisptr.add_operator(mystring_, arity)
+        self.primitiveSet.add_operator(mystring_, arity)
     def add_variable(self, mystring):
         mystring_ = mystring.encode('utf-8')
-        self.thisptr.add_variable(mystring_)
+        self.primitiveSet.add_variable(mystring_)
 
 cdef extern from "enumerator.h":
     cdef cppclass Enumerator:
-        Enumerator(PrimitiveSet*)
+        Enumerator()
+        void init(PrimitiveSet)
         int get_Q(int)
         vector[int] calculate_Q(int)
         vector[string] exhaustive_global_search(int,int)
@@ -37,35 +35,34 @@ cdef extern from "enumerator.h":
         
 cdef class CyEnumerator:
     cdef CyPrimitiveSet primitiveSet
-    cdef Enumerator *thisptr
-    def __init__(self, CyPrimitiveSet primitiveSet):
-        self.primitiveSet = primitiveSet
-        self.thisptr = new Enumerator(self.primitiveSet.thisptr)
-    def __dealloc__(self):
-        del self.thisptr
-    def rebuild(primitiveSet,None):
-        p = CyEnumerator(primitiveSet)
+    cdef Enumerator enumerator
+    def rebuild(primitiveSet):
+        p = CyEnumerator()
+        p.init(primitiveSet)
         return p
     def __reduce__(self):
         return (CyEnumerator.rebuild, (self.primitiveSet,))
+    def init(self, prim):
+        self.primitiveSet = prim
+        self.enumerator.init(self.primitiveSet.primitiveSet)
     def calculate_Q(self,n):
-        weights = self.thisptr.calculate_Q(n)
-        Q = self.thisptr.get_Q(n)
+        weights = self.enumerator.calculate_Q(n)
+        Q = self.enumerator.get_Q(n)
         return Q, weights
     def exhaustive_global_search(self, n, max_iters=None):
         if max_iters is not None:
-            v = self.thisptr.exhaustive_global_search(n,max_iters)
+            v = self.enumerator.exhaustive_global_search(n,max_iters)
         else:
-            v = self.thisptr.exhaustive_global_search(n,0)
+            v = self.enumerator.exhaustive_global_search(n,0)
         vcopy = vector[string](v.size())
         for i in range(0,v.size()):
             vcopy[i] = v[i].decode('utf-8')
         return vcopy
     def uniform_random_global_search_once(self,n):
-        mystring_ = self.thisptr.uniform_random_global_search_once(n).decode('utf-8')
+        mystring_ = self.enumerator.uniform_random_global_search_once(n).decode('utf-8')
         return mystring_
     def uniform_random_global_search(self,n, iter, seed):
-        v = self.thisptr.uniform_random_global_search(n,iter)
+        v = self.enumerator.uniform_random_global_search(n,iter)
         vcopy = vector[string](v.size())
         for i in range(0,v.size()):
             vcopy[i] = v[i].decode('utf-8')
