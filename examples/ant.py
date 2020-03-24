@@ -222,15 +222,14 @@ if __name__ == "__main__":
         pset.add_variable("ant.turn_right()")
         enum = pg.Enumerator(pset)
     elif cppimpl == True:
-        pset = cy.CyPrimitiveSet()
-        enum = cy.CyEnumerator()
+        pset = cy.CyPrimitiveSet()        
         pset.add_operator("ant.if_food_ahead", 2)
         pset.add_operator("prog2", 2)
         pset.add_operator("prog3", 3)
         pset.add_variable("ant.move_forward()")
         pset.add_variable("ant.turn_left()")
         pset.add_variable("ant.turn_right()")
-        enum.init(pset)
+        enum = cy.CyEnumerator(pset)
 
     if exhaustive == True:
         _, weights = enum.calculate_Q(maximum_tree_complexity_index)
