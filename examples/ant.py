@@ -263,7 +263,7 @@ if __name__ == "__main__":
                     max_score = score
                 if iter % frequency_printing == 0:
                     print("best score of this run:" + str(max_score),
-                          'iteration:'+ str(iter), end='\r')
+                          'at iteration:'+ str(iter), end='\r')
         else:
             raise Exception("Invalid value multiproc must be true/false")
     elif exhaustive == False:
@@ -288,7 +288,7 @@ if __name__ == "__main__":
                     max_score = score
                 if iter % frequency_printing == 0:
                     print("best score of this run:" + str(max_score),
-                          'iteration:'+ str(iter), end='\r')
+                          'at iteration:'+ str(iter), end='\r')
         else:
             raise Exception("Invalid multiproc, must be true/false")
     else:
