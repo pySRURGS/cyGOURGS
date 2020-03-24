@@ -146,7 +146,7 @@ def main_rando_queue(seed, enum, max_tree_complx, queue):
         and puts it in the queue 
         used for multiprocessing
     """
-    soln = enum.uniform_random_global_search_once(max_tree_complx)
+    soln = enum.uniform_random_global_search_once(max_tree_complx,seed)
     score = evalArtificialAnt(soln)    
     queue.put([score, soln])
 
@@ -278,9 +278,12 @@ if __name__ == "__main__":
                                  queue=queue, pm_pbar=True, pm_chunksize=3)
             runner.join()
         elif multiproc == False:
+            seeds = []
+            for i in range(0,n_iters):
+                seeds.append(i)
             for soln in enum.uniform_random_global_search(
                                                   maximum_tree_complexity_index,
-                                                   n_iters, seed=deterministic):
+                                                   n_iters, seeds):
                 score = main(soln)[0]
                 pg.save_result_to_db(output_db, score, soln)
                 iter = iter + 1

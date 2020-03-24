@@ -8,9 +8,9 @@ class Enumerator
 public:
 
     void init(PrimitiveSet primitiveSet);
-    std::vector<std::string> exhaustive_global_search(int n, int max_iters = 0);
-    std::vector<std::string> uniform_random_global_search(int n, int num_iters);
-    std::string uniform_random_global_search_once(int n);
+    std::vector<std::string> exhaustive_global_search( int n, int max_iters = 0 );
+    std::vector<std::string> uniform_random_global_search( int n, int num_iters, std::vector<long> seeds );
+    std::string uniform_random_global_search_once(int n, long seed = 0);
     int calculate_R_i(int i);
     int calculate_S_i(int i);
     int get_Q(int n);

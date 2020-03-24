@@ -46,8 +46,8 @@ cdef extern from "enumerator.h":
         int get_Q(int)
         vector[int] calculate_Q(int)
         vector[string] exhaustive_global_search(int,int)
-        string uniform_random_global_search_once(int)
-        vector[string] uniform_random_global_search(int,int)
+        string uniform_random_global_search_once(int,long)
+        vector[string] uniform_random_global_search(int,int,vector[long])
 
 
 def rebuild_enumerator(pset):
@@ -84,13 +84,20 @@ cdef class CyEnumerator:
         for i in range(0,v.size()):
             vcopy[i] = v[i].decode('utf-8')
         return vcopy
-        
-    def uniform_random_global_search_once(self, n):
-        s = self.enumerator.uniform_random_global_search_once(n)
-        return s.decode('utf-8')
-        
-    def uniform_random_global_search(self, n, iter, seed):
-        v = self.enumerator.uniform_random_global_search(n,iter)
+    def uniform_random_global_search_once(self,n,seed):
+        cdef long local_seed = 0;
+        if seed is not None:
+            local_seed = seed
+        else:
+            local_seed = 0
+        mystring_ = self.enumerator.uniform_random_global_search_once(n, local_seed).decode('utf-8')
+        return mystring_
+    def uniform_random_global_search(self,n, iter, seeds):
+        cdef vector[string] v;
+        if type(seeds) == list():
+            v = self.enumerator.uniform_random_global_search(n,iter,seeds)
+        else:
+            v = self.enumerator.uniform_random_global_search(n,iter,[])
         vcopy = vector[string](v.size())
         for i in range(0,v.size()):
             vcopy[i] = v[i].decode('utf-8')

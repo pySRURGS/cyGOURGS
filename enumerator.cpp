@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string>
 #include <random>
+#include <chrono>
 
 #include "enumerator.h"
 #include "boost/algorithm/string/replace.hpp"
@@ -21,6 +22,7 @@ namespace patch
 }
 
 using namespace std;
+using namespace std::chrono;
 namespace mp = boost::multiprecision;
 
 
@@ -52,20 +54,28 @@ std::vector<std::string> Enumerator::exhaustive_global_search(int n, int max_ite
     return candidate_solutions;
 }
 
-std::vector<std::string> Enumerator::uniform_random_global_search(int n, int num_iters)
+std::vector<std::string> Enumerator::uniform_random_global_search(int n, int num_iters, std::vector<long> seeds)
 {
     vector<string> soln;
+    if( seeds.size() > 0 && num_iters != seeds.size() )
+    {
+        cerr << "Enumerator::uniform_random_global_search: invalid seeds number" << endl;
+        return soln;
+    }
     for(int i=0;i<num_iters;i++)
     {
-        soln.push_back( uniform_random_global_search_once( n ) );
+        if(seeds.size() > 0 )
+            soln.push_back( uniform_random_global_search_once( n, seeds[i] ) );
+        else
+            soln.push_back( uniform_random_global_search_once( n ) );
     }
     return soln;
 }
 
-string Enumerator::uniform_random_global_search_once(int n)
+string Enumerator::uniform_random_global_search_once(int n, long seed )
 {
     //printf("\nEnumerator::uniform_random_global_search_once begin\n");
-    vector<int> weights = calculate_Q(n);
+    vector<int> weights = calculate_Q( n );
     double sum_of_weight = 0;
     for(int j=0; j<n; j++) {
        sum_of_weight += weights[j];
@@ -76,12 +86,11 @@ string Enumerator::uniform_random_global_search_once(int n)
     }
 
     boost::mt19937 gen;
-//    struct timeval time;
-//    gettimeofday(&time,NULL);
-    // microsecond has 1 000 000
-    // Assuming you did not need quite that accuracy
-    // Also do not assume the system clock has that accuracy.
-    gen.seed(std::time(0));
+    if( seed > 0)
+    {
+        gen.seed( seed );
+    }
+
     boost::random::discrete_distribution<> weightdist( norm_weights.begin(), norm_weights.end() );
     int i = weightdist(gen);
     int r_i = calculate_R_i(i);

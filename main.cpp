@@ -17,7 +17,13 @@ int main(int argc, char *argv[])
     ps.add_variable("ant.turn_right()");
     Enumerator en;
     en.init(ps);
-    vector<string> soln = en.uniform_random_global_search(1000,10);
+    int iters = 10;
+    vector<int long> seeds;
+    for(int i=0; i< iters; i++)
+    {
+        seeds.push_back(i);
+    }
+    vector<string> soln = en.uniform_random_global_search(1000,iters, seeds);
     for( int i = 0; i < soln.size();i++ )
     {
         printf("\nSolution no: %d\n %s\n", i , soln[i].c_str());
