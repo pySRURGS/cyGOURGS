@@ -84,14 +84,18 @@ cdef class CyEnumerator:
         for i in range(0,v.size()):
             vcopy[i] = v[i].decode('utf-8')
         return vcopy
+        
     def uniform_random_global_search_once(self,n,seed):
+        # returns utf-8 decoded string
         cdef long local_seed = 0;
         if seed is not None:
             local_seed = seed
         else:
             local_seed = 0
-        mystring_ = self.enumerator.uniform_random_global_search_once(n, local_seed).decode('utf-8')
-        return mystring_
+        s = self.enumerator.uniform_random_global_search_once(n, local_seed)
+        s = s.decode('utf-8')
+        return s
+        
     def uniform_random_global_search(self,n, iter, seeds):
         cdef vector[string] v;
         if type(seeds) == list():
