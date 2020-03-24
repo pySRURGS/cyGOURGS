@@ -9,12 +9,11 @@ import pickle
 
 # IN ORDER TO RUN AGAINST PYTHON, SET TO FALSE
 # IN ORDER TO RUN AGAINST C++, SET TO TRUE
-
+cppimpl = True
 if cppimpl == True:
     print("Ran in c++ mode")
 else:
     print("Ran in python mode")
-cppimpl = False
 
 if cppimpl != True:
     pset = pg.PrimitiveSet()
