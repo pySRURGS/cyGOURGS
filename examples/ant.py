@@ -269,7 +269,10 @@ if __name__ == "__main__":
     elif exhaustive == False:
         num_solns = n_iters
         if multiproc == True:
-            seeds = list(range(0,n_iters))
+            a_time = int(start_time)
+            seeds = np.arange(0, n_iters)
+            seeds = seeds*a_time
+            seeds = seeds.tolist()
             runner = mp.Process(target=solution_saving_worker,
                              args=(queue, num_solns, output_db))
             runner.start()
