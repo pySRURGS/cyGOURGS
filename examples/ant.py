@@ -16,6 +16,7 @@ import argparse
 from sqlitedict import SqliteDict
 import cython_call as cy
 import time
+import numpy as np
 start_time = time.time()
 
 def progn(*args):
@@ -268,11 +269,11 @@ if __name__ == "__main__":
             raise Exception("Invalid value multiproc must be true/false")
     elif exhaustive == False:
         num_solns = n_iters
+        a_time = int(start_time)
+        seeds = np.arange(0, n_iters)
+        seeds = seeds * a_time
+        seeds = seeds.tolist()
         if multiproc == True:
-            a_time = int(start_time)
-            seeds = np.arange(0, n_iters)
-            seeds = seeds*a_time
-            seeds = seeds.tolist()
             runner = mp.Process(target=solution_saving_worker,
                              args=(queue, num_solns, output_db))
             runner.start()
@@ -281,9 +282,6 @@ if __name__ == "__main__":
                                  queue=queue, pm_pbar=True, pm_chunksize=3)
             runner.join()
         elif multiproc == False:
-            seeds = []
-            for i in range(0,n_iters):
-                seeds.append(i)
             for soln in enum.uniform_random_global_search(
                                                   maximum_tree_complexity_index,
                                                    n_iters, seeds):

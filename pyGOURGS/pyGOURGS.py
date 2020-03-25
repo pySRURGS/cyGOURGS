@@ -783,10 +783,14 @@ class Enumerator(object):
         candidate_solution: string
             The candidate solution generated
         """
-        if seed is not None:
+        if seed is not None and type(seed) != list:
             random.seed(seed)
-        for j in range(0, num_soln):
-            yield self.uniform_random_global_search_once(N)
+        if type(seed) == list and len(seed) == num_soln:
+            for j in range(0, num_soln):
+                yield self.uniform_random_global_search_once(N, seed[j])
+        else:
+            for j in range(0, num_soln):
+                yield self.uniform_random_global_search_once(N)
         
     def exhaustive_global_search(self, N, max_iters=None):
         """
