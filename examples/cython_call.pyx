@@ -11,11 +11,19 @@ cdef extern from "primitiveset.h":
         PrimitiveSet() except +
         void add_operator(string, int)
         void add_variable(string)
-        vector[int] get_arities()
+
+        void set_operators_map(map[int, vector[string]])
+        void set_fitting_parameters(vector[string])
+        void set_variables(vector[string])
+        void set_names(vector[string])
+
         vector[string] get_operators(int)
-        vector[string] m_variables;
-        vector[string] m_fitting_parameters;
-        map[int, vector[string]] m_operators_map;
+        vector[int] get_arities()
+
+        map[int, vector[string]] get_operators_map()
+        vector[string] get_fitting_parameters()
+        vector[string] get_variables()
+        vector[string] get_names()
         
 def rebuild_primitiveset():
     p = CyPrimitiveSet
@@ -27,14 +35,20 @@ cdef class CyPrimitiveSet:
     cdef PrimitiveSet primitiveSet
 
     def __getstate__(self):
-        return (self.primitiveSet.m_operators_map,
-                self.primitiveSet.m_fitting_parameters,
-                self.primitiveSet.m_variables)
+        return (self.primitiveSet.get_operators_map(),
+                self.primitiveSet.get_fitting_parameters(),
+                self.primitiveSet.get_variables(),
+                self.primitiveSet.get_names())
 
     def __setstate__(self,x):
-        (self.primitiveSet.m_operators_map,
-         self.primitiveSet.m_fitting_parameters,
-         self.primitiveSet.m_variables) = x
+        (operators_map,
+         fitting_parameters,
+         variables,
+         names) = x
+        self.primitiveSet.set_operators_map(operators_map)
+        self.primitiveSet.set_fitting_parameters(fitting_parameters)
+        self.primitiveSet.set_variables(variables)
+        self.primitiveSet.set_names(names)
         
     def add_operator(self, mystring, arity):
         mystring_ = mystring.encode('utf-8')
@@ -79,7 +93,7 @@ cdef class CyEnumerator:
     def __init__(self, CyPrimitiveSet pset):
         self.primitiveSet = pset
         self.enumerator = Enumerator()
-        self.enumerator.m_primitiveSet = pset.primitiveSet
+        self.enumerator.init(pset.primitiveSet)
 
     def __getstate__(self):
         return (self.primitiveSet,)

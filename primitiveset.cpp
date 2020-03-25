@@ -109,8 +109,44 @@ std::vector<std::string> PrimitiveSet::get_operators(int arity)
     return m_operators_map[arity];
 }
 
-vector<int> PrimitiveSet::extract_keys(
-                                      map<int, vector<string>> const& input_map)
+const std::map<int, std::vector<std::string>>& PrimitiveSet::get_operators_map()
+{
+    return m_operators_map;
+}
+
+const std::vector<std::string>&  PrimitiveSet::get_variables()
+{
+    return m_variables;
+}
+
+const std::vector<std::string>&  PrimitiveSet::get_fitting_parameters()
+{
+    return m_fitting_parameters;
+}
+
+const std::vector<std::string>&  PrimitiveSet::get_names()
+{
+    return m_variables;
+}
+
+void PrimitiveSet::set_operators_map(const std::map<int, std::vector<std::string>>& operators_map)
+{
+    m_operators_map = operators_map;
+}
+void PrimitiveSet::set_variables(const std::vector<std::string>& variables)
+{
+    m_variables = variables;
+}
+void PrimitiveSet::set_fitting_parameters(const std::vector<std::string>& fitting_parameters)
+{
+    m_fitting_parameters = fitting_parameters;
+}
+void PrimitiveSet::set_names(const std::vector<std::string>& names)
+{
+    m_names = names;
+}
+
+vector<int> PrimitiveSet::extract_keys(map<int, vector<string>> const& input_map)
 {
     /*
     Returns all the keys in a mapping of integers to vector<strings>
