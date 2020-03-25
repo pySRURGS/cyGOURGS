@@ -26,11 +26,15 @@ cdef class CyPrimitiveSet:
     # See the C++ implementation for details 
     cdef PrimitiveSet primitiveSet
 
-    def __cinit__(self):
-        self.primitiveSet = PrimitiveSet()
+    def __getstate__(self):
+        return (self.primitiveSet.m_operators_map,
+                self.primitiveSet.m_fitting_parameters,
+                self.primitiveSet.m_variables)
 
-    def __reduce__(self):
-        return (rebuild_primitiveset, tuple())
+    def __setstate__(self,x):
+        (self.primitiveSet.m_operators_map,
+         self.primitiveSet.m_fitting_parameters,
+         self.primitiveSet.m_variables) = x
         
     def add_operator(self, mystring, arity):
         mystring_ = mystring.encode('utf-8')
@@ -44,8 +48,8 @@ cdef class CyPrimitiveSet:
         return self.primitiveSet.get_arities()
 
     def get_operators(self, arity):
-        return self.primitiveSet.get_operators(arity)
-        
+        operators = self.primitiveSet.get_operators(arity)
+        return operators
                
 cdef extern from "enumerator.h":
     # Declare a c++ class interface for enumerator
@@ -57,6 +61,8 @@ cdef extern from "enumerator.h":
         vector[string] exhaustive_global_search(int,int)
         string uniform_random_global_search_once(int,long)
         vector[string] uniform_random_global_search(int,int,vector[long])
+        string generate_specified_solution(int, int, int, int)
+        PrimitiveSet m_primitiveSet
 
 
 def rebuild_enumerator(pset):
@@ -68,16 +74,20 @@ cdef class CyEnumerator:
     # Create Cython wrapper class for enumerator
     # See the C++ implementation for details 
     cdef CyPrimitiveSet primitiveSet
-    
     cdef Enumerator enumerator
     
-    def __cinit__(self, CyPrimitiveSet pset):
+    def __init__(self, CyPrimitiveSet pset):
         self.primitiveSet = pset
         self.enumerator = Enumerator()
-        self.enumerator.init(pset.primitiveSet)
+        self.enumerator.m_primitiveSet = pset.primitiveSet
 
-    def __reduce__(self):
-        return (rebuild_enumerator, (self.primitiveSet,))
+    def __getstate__(self):
+        return (self.primitiveSet,)
+
+    def __setstate__(self, x):
+        (self.primitiveSet,) = x
+        pset = self.primitiveSet
+        self.enumerator.init(pset.primitiveSet)
         
     def calculate_Q(self, n):
         weights = self.enumerator.calculate_Q(n)
@@ -94,7 +104,7 @@ cdef class CyEnumerator:
             vcopy[i] = v[i].decode('utf-8')
         return vcopy
         
-    def uniform_random_global_search_once(self,n,seed):
+    def uniform_random_global_search_once(self, n, seed):
         # returns utf-8 decoded string
         cdef long local_seed = 0;
         if seed is not None:
@@ -105,13 +115,16 @@ cdef class CyEnumerator:
         s = s.decode('utf-8')
         return s
         
-    def uniform_random_global_search(self,n, iter, seeds):
+    def uniform_random_global_search(self, n, iter, seeds):
         cdef vector[string] v;
         if type(seeds) == list():
-            v = self.enumerator.uniform_random_global_search(n,iter,seeds)
+            v = self.enumerator.uniform_random_global_search(n, iter, seeds)
         else:
-            v = self.enumerator.uniform_random_global_search(n,iter,[])
+            v = self.enumerator.uniform_random_global_search(n, iter,[])
         vcopy = vector[string](v.size())
         for i in range(0,v.size()):
             vcopy[i] = v[i].decode('utf-8')
         return vcopy
+        
+    def generate_specified_solution(self, i, r, s, n):
+        return self.enumerator.generate_specified_solution(i, r, s, n)

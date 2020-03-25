@@ -22,7 +22,8 @@ public:
     int calculate_a_i(int i);
     std::string generate_specified_solution(int i, int r, int s, int n);
     std::string ith_n_ary_tree(int i);
-
+    PrimitiveSet m_primitiveSet;
+    
 private:
     std::vector<std::string> get_element_of_cartesian_product(std::vector<
                                                std::vector<std::string> > pools,
@@ -35,9 +36,6 @@ private:
     std::vector<int> deinterleave(std::vector<int> num, int n);
     int findOccurenciesCount(const std::string& data, 
                              const std::string& toSearch);
-
-private:
-    PrimitiveSet    m_primitiveSet;
     std::vector<int> m_results_for_calculate_Q;
     std::vector<int> m_q;
     std::map<int, std::vector<int> > m_all_g_is;

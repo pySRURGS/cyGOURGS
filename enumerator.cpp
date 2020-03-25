@@ -13,6 +13,7 @@
 
 namespace patch
 {
+// This to_string was only implemented to bypass a bug in gcc
     template < typename T > std::string to_string(const T& n)
     {
         std::ostringstream stm ;
@@ -34,6 +35,24 @@ void Enumerator::init(PrimitiveSet primitiveSet)
 std::vector<std::string> Enumerator::exhaustive_global_search(int n, 
                                                               int max_iters)
 {
+    // Yields (this is a generator) candidate solutions incrementally 
+    // increasing the operator/terminals configurations indices and tree index 
+    // iterator
+    
+    // Parameters
+    // ----------
+
+    // N: int 
+        // User specified maximum complexity index
+    
+    // max_iters: int
+        // The maximum number of solutions which can be considered. Will 
+        // overrule `N` in terms of cutting off the run.
+        
+    // Yields
+    // -------
+    // candidate_solution: string
+        // The candidate solution generated
     int iters = 1;
     vector<string> candidate_solutions;
     for(int i = 0; i < n; i++)
@@ -303,25 +322,26 @@ int Enumerator::calculate_a_i(int i)
 
 string Enumerator::generate_specified_solution(int i, int r, int s, int n)
 {
+    string msg;
     int r_i = calculate_R_i(i);
     int s_i = calculate_S_i(i);
     if ((r >= r_i) || (r < 0))
     {
-        cerr << "Enumerator::generate_specified_solution: invalid operator" 
-                                                                        << endl;
-        return "";
+        msg = "Enumerator::generate_specified_solution: invalid operator";
+        cerr << msg << endl;
+        return msg;
     }
     if((s >= s_i)  || (s < 0))
     {
-        cerr << "Enumerator::generate_specified_solution InvalidTreeIndex" 
-                                                                        << endl;
-        return "";
+        msg = "Enumerator::generate_specified_solution InvalidTreeIndex" ; 
+        cerr << msg << endl;
+        return msg;
     }
     if (i > n)
     {
-        cerr << "Enumerator::generate_specified_solution InvalidTreeIndex" 
-                                                                        << endl;
-        return "";
+        msg = "Enumerator::generate_specified_solution InvalidTreeIndex i>n";
+        cerr << msg << endl;
+        return msg;
     }
     string tree = "";
     tree = ith_n_ary_tree(i);
