@@ -253,7 +253,7 @@ if __name__ == "__main__":
                 print('\r' + "Progress: " + str(iter/num_solns), end='')
             results = parmap.map(main_queue, jobs, queue=queue,
                                  pm_pbar=True, pm_chunksize=3)
-            runner.join(timeout=0.1)
+            runner.join()
         elif multiproc == False:
             for soln in enum.exhaustive_global_search(
                                                  maximum_tree_complexity_index):

@@ -10,3 +10,5 @@ build/
 *.db
 /examples/cython_call.cpp
 /examples/enumerator_call.cpp
+/.coverage
+/examples/.coverage

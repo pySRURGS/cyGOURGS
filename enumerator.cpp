@@ -65,7 +65,7 @@ std::vector<std::string> Enumerator::exhaustive_global_search(int n,
             {
                 candidate_solutions.push_back(generate_specified_solution(i, 
                                                                     r, s, n));
-                if(max_iters > 0 && iters++ > max_iters)
+                if(max_iters > 0 &&  iters++ >= max_iters)
                 {
                     return candidate_solutions;
                 }
@@ -110,9 +110,15 @@ string Enumerator::uniform_random_global_search_once(int n, long seed)
     }
 
     boost::mt19937 gen;
-    if(seed > 0)
+    if( seed != LONG_MAX )
     {
         gen.seed(seed);
+    }
+    if( seed == LONG_MAX)
+    {
+        auto duration = std::chrono::system_clock::now().time_since_epoch();
+        auto nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
+        gen.seed(nanos);
     }
 
     boost::random::discrete_distribution<> weightdist(norm_weights.begin(), 
@@ -137,10 +143,6 @@ int Enumerator::calculate_R_i(int i)
     if(it != m_r_is.end())
     {
         return it->second;
-    }
-    if(m_r_is.size() > i )
-    {
-        return m_r_is[i];
     }
     if (i == 0)
     {
@@ -217,9 +219,8 @@ vector<int> Enumerator::calculate_all_G_i_b(int i)
     std::map<int, std::vector<int> >::iterator it = m_all_g_is.find(i);
     if(it != m_all_g_is.end())
     {
-     return it->second;
+        return it->second;
     }
-
     vector<int> arities = m_primitiveSet.get_arities();
     int k = arities.size();
     vector<int> list_g_i_b;
@@ -569,31 +570,73 @@ vector<int> Enumerator::numberToBase(int n, int b)
      return digits;
 }
 
+//int Enumerator::base_m_to_decimal(int v, int m)
+//{
+//    string str_v = patch::to_string(v);
+//    const char* str = str_v.c_str();
+//    int len = strlen(str);
+//    int power = 1; // Initialize power of m
+//    int num = 0;  // Initialize result
+//    int i;
+
+//    // Decimal equivalent is str[len-1]*1 +
+//    // str[len-1]*m + str[len-1]*(m^2) + ...
+//    for (i = len - 1; i >= 0; i--)
+//    {
+//       // A digit in input number must be
+//       // less than number's base
+//       if (numVal(str[i]) > m)
+//       {
+//          printf("Invalid Number");
+//          return -1;
+//       }
+
+//       num += numVal(str[i]) * power;
+//       power = power * m;
+//    }
+//    return num;
+//}
+
 int Enumerator::base_m_to_decimal(int v, int m)
 {
-    string str_v = patch::to_string(v);
-    const char* str = str_v.c_str();
-    int len = strlen(str);
-    int power = 1; // Initialize power of m
-    int num = 0;  // Initialize result
-    int i;
-
-    // Decimal equivalent is str[len-1]*1 +
-    // str[len-1]*m + str[len-1]*(m^2) + ...
-    for (i = len - 1; i >= 0; i--)
+    int result = 0;
+    if( m > 10 )
     {
-       // A digit in input number must be
-       // less than number's base
-       if (numVal(str[i]) >= m)
-       {
-          printf("Invalid Number");
-          return -1;
-       }
-
-       num += numVal(str[i]) * power;
-       power = power * m;
+        cerr << "Enumerator::base_m_to_decimal: Cannot handle m > 10 and type(v) is int. Input v as list";
+        throw 2;
     }
-    return num;
+    else if( m == 1 )
+    {
+        string vstring = to_string(v);
+        for(int i = 0; i < vstring.size(); i++)
+        {
+            result += numVal(vstring[i]);
+        }
+    }
+    else if ( m >= 2 )
+    {
+       vector<int> number;
+       int power = 1;
+       string vstring = to_string(v);
+       for(int i = 0; i < vstring.size(); i++)
+       {
+           number.push_back( numVal(vstring[i] ) );
+       }
+       for(int i = number.size() - 1; i >= 0; i--)
+       {
+          // A digit in input number must be
+          // less than number's base
+          if ( number[i] > m )
+          {
+             printf("Invalid Number");
+             return -1;
+          }
+
+          result += number[i] * power;
+          power *= m;
+       }
+    }
+    return result;
 }
 
 int Enumerator::numVal(char c)

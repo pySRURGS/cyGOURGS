@@ -76,6 +76,16 @@ cdef extern from "enumerator.h":
         string uniform_random_global_search_once(int,long)
         vector[string] uniform_random_global_search(int,int,vector[long])
         string generate_specified_solution(int, int, int, int)
+        int calculate_R_i(int);
+        int calculate_S_i(int);
+        int calculate_l_i_b(int,int)
+        int calculate_G_i_b(int,int)
+        int calculate_a_i(int)
+        string ith_n_ary_tree(int)
+
+        vector[int] decimal_to_base_m(int, int)
+        vector[int] numberToBase(int,int)
+        int base_m_to_decimal(int, int)
         PrimitiveSet m_primitiveSet
 
 
@@ -118,20 +128,17 @@ cdef class CyEnumerator:
             vcopy[i] = v[i].decode('utf-8')
         return vcopy
         
-    def uniform_random_global_search_once(self, n, seed):
-        # returns utf-8 decoded string
-        cdef long local_seed = 0;
+    def uniform_random_global_search_once(self, n, seed=None):
+        cdef long local_seed = 1 << 31;
         if seed is not None:
             local_seed = seed
-        else:
-            local_seed = 0
         s = self.enumerator.uniform_random_global_search_once(n, local_seed)
         s = s.decode('utf-8')
         return s
         
-    def uniform_random_global_search(self, n, iter, seeds):
+    def uniform_random_global_search(self, n, iter, seeds=None):
         cdef vector[string] v;
-        if type(seeds) == list():
+        if type(seeds) == list:
             v = self.enumerator.uniform_random_global_search(n, iter, seeds)
         else:
             v = self.enumerator.uniform_random_global_search(n, iter,[])
@@ -139,6 +146,38 @@ cdef class CyEnumerator:
         for i in range(0,v.size()):
             vcopy[i] = v[i].decode('utf-8')
         return vcopy
-        
+
     def generate_specified_solution(self, i, r, s, n):
         return self.enumerator.generate_specified_solution(i, r, s, n)
+        
+    def calculate_R_i(self,i):
+        return self.enumerator.calculate_R_i(i)
+
+    def calculate_S_i(self,i):
+        return self.enumerator.calculate_S_i(i)
+
+    def calculate_l_i_b(self,i,b):
+        return self.enumerator.calculate_l_i_b(i,b)
+
+    def calculate_G_i_b(self,i,b):
+        return self.enumerator.calculate_G_i_b(i,b)
+
+    def calculate_a_i(self,i):
+        return self.enumerator.calculate_a_i(i)
+
+    def calculate_l_i_b(self,i,b):
+        return self.enumerator.calculate_l_i_b(i,b)
+
+    def ith_n_ary_tree(self,i):
+        return self.enumerator.ith_n_ary_tree(i).decode('utf-8')
+
+    def decimal_to_base_m(self, decimal, m):
+        return self.enumerator.decimal_to_base_m(decimal,m)
+
+    def numberToBase(self, n, b):
+        return self.enumerator.numberToBase(n,b)
+
+    def base_m_to_decimal(self, v, m):
+        return self.enumerator.base_m_to_decimal(v,m)
+
+
