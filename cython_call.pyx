@@ -82,9 +82,9 @@ cdef extern from "enumerator.h":
         int calculate_G_i_b(int,int)
         int calculate_a_i(int)
         string ith_n_ary_tree(int)
-
-        vector[int] decimal_to_base_m(int, int)
-        vector[int] numberToBase(int,int)
+        
+        void decimal_to_base_m(int, int,vector[int]&)
+        void numberToBase(int,int, vector[int]&)
         int base_m_to_decimal(int, int)
         PrimitiveSet m_primitiveSet
 
@@ -172,12 +172,14 @@ cdef class CyEnumerator:
         return self.enumerator.ith_n_ary_tree(i).decode('utf-8')
 
     def decimal_to_base_m(self, decimal, m):
-        return self.enumerator.decimal_to_base_m(decimal,m)
+        cdef vector[int] result
+        self.enumerator.decimal_to_base_m(decimal,m,result)
+        return result
 
     def numberToBase(self, n, b):
-        return self.enumerator.numberToBase(n,b)
+        cdef vector[int] result
+        self.enumerator.numberToBase(n,b,result)
+        return result
 
     def base_m_to_decimal(self, v, m):
         return self.enumerator.base_m_to_decimal(v,m)
-
-

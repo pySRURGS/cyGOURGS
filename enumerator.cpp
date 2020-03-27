@@ -271,17 +271,24 @@ int Enumerator::calculate_l_i_b(int i, int b)
         {
             l_i_b += 1;
         }
-        vector<int> e_base_arity = decimal_to_base_m(e,m);
-        vector<int> list_bits = deinterleave(e_base_arity, m);
-        vector<int> list_bits_deci;
-        for(int u = 0; u < list_bits.size(); u++)
+        if( m == 1 )
         {
-            list_bits_deci.push_back(base_m_to_decimal(list_bits[u],m));
+            l_i_b += calculate_l_i_b(e,b);
         }
-        for(int ii = 0; ii < list_bits_deci.size(); ii++)
+        else if( m > 1)
         {
-            int i_deinterleave = list_bits_deci[ii];
-            l_i_b += calculate_l_i_b(i_deinterleave, b);
+            vector<int> list_bits_deci;
+            base_computations(e,m,list_bits_deci);
+            for(int ii = 0; ii < list_bits_deci.size(); ii++)
+            {
+                int i_deinterleave = list_bits_deci[ii];
+                l_i_b += calculate_l_i_b(i_deinterleave, b);
+            }
+        }
+        else
+        {
+        	cerr << "Enumerator::calculate_l_i_b: Invalid value for m" << endl;
+        	throw 2;
         }
     }
     return l_i_b;
@@ -305,17 +312,24 @@ int Enumerator::calculate_a_i(int i)
         int e = (i - 1) / k;
         int j = (i - 1) % k;
         int m = arities[j];
-        vector<int> e_base_arity = decimal_to_base_m(e,m);
-        vector<int> list_bits = deinterleave(e_base_arity, m);
-        vector<int> list_bits_deci;
-        for(int u = 0; u < list_bits.size(); u++)
+        if( m == 1 )
         {
-            list_bits_deci.push_back(base_m_to_decimal(list_bits[u],m));
+            a_i += calculate_a_i(e);
         }
-        for(int ii = 0; ii < list_bits_deci.size(); ii++)
+        else if ( m > 1)
         {
-            int i_deinterleave = list_bits_deci[ii];
-            a_i += calculate_a_i(i_deinterleave);
+            vector<int> list_bits_deci;
+            base_computations(e,m,list_bits_deci);
+            for(int ii = 0; ii < list_bits_deci.size(); ii++)
+            {
+                int i_deinterleave = list_bits_deci[ii];
+                a_i += calculate_a_i(i_deinterleave);
+            }
+        }
+        else
+        {
+        	cerr << "Enumerator::calculate_a_i: Invalid value for m" << endl;
+        	throw 2;
         }
     }
     return a_i;
@@ -450,17 +464,20 @@ string Enumerator::ith_n_ary_tree(int i)
         int e = (i - 1) / k;
         int j = (i - 1) % k;
         int m = arities[j];
-        vector<int> e_base_arity = decimal_to_base_m(e,m);
-        vector<int> list_bits = deinterleave(e_base_arity, m);
-        vector<int> list_bits_deci;
-        for(int u = 0; u < list_bits.size(); u++)
-        {
-            list_bits_deci.push_back(base_m_to_decimal(list_bits[u],m));
-        }
         vector<string> subtrees;
-        for(int x = 0; x < list_bits_deci.size(); x++)
+        if( m == 1 )
         {
-            subtrees.push_back(ith_n_ary_tree(list_bits_deci[x]));
+            subtrees.push_back( ith_n_ary_tree( e ) );
+        }
+        else if ( m > 1 )
+        {
+            vector<int> list_bits_deci;
+            base_computations(e,m,list_bits_deci);
+            for(int ii = 0; ii < list_bits_deci.size(); ii++)
+            {
+                int i_deinterleave = list_bits_deci[ii];
+                subtrees.push_back(ith_n_ary_tree(i_deinterleave));
+            }
         }
         tree = "[";
         //tree.append(",");
@@ -522,44 +539,47 @@ int Enumerator::get_arity_of_term(int start_index, const string& tree){
     return arity;
 }
 
-vector<int> Enumerator::decimal_to_base_m(int v, int m)
+void Enumerator::decimal_to_base_m(int v, int m, vector<int>& e_base_arity)
 {
-    vector<int> result;
     if(v < 0)
     {
         cerr << "decimal_to_base_m: Do not supply negative values" << endl;
-        return result;
+        throw 2;
     }
     if (v == 0)
     {
-        result.push_back(0);
-        return result;
-    }
-    if (m == 1)
-    {
-        for(int i = 0; i < v; i++)
-        {
-            result.push_back(1);
-        }
-    }
-    else if(m >= 2)
-    {
-        result = numberToBase(v, m);
+        e_base_arity.push_back(0);
     }
     else
     {
-        cerr << "Invalid m" << endl;
+        if (m == 1)
+        {
+            e_base_arity.clear();
+            e_base_arity.reserve( v - 1);
+            for(int i = 0; i < v; i++)
+            {
+                e_base_arity.push_back(1);
+            }
+        }
+        else if(m >= 2)
+        {
+            numberToBase(v, m,e_base_arity);
+        }
+        else
+        {
+            cerr << " Enumerator::decimal_to_base_m: Invalid m" << endl;
+            throw 2;
+        }
     }
-    return result;
-
 }
-vector<int> Enumerator::numberToBase(int n, int b)
+
+void Enumerator::numberToBase(int n, int b, vector<int>& digits)
 {
-    vector<int> digits;
+    digits.clear();
     if (n == 0)
     {
         digits.push_back(0);
-        return digits;
+        return;
     }
     while (n != 0)
     {
@@ -567,35 +587,7 @@ vector<int> Enumerator::numberToBase(int n, int b)
         n /= b;
     }
      std::reverse(digits.begin(), digits.end());
-     return digits;
 }
-
-//int Enumerator::base_m_to_decimal(int v, int m)
-//{
-//    string str_v = patch::to_string(v);
-//    const char* str = str_v.c_str();
-//    int len = strlen(str);
-//    int power = 1; // Initialize power of m
-//    int num = 0;  // Initialize result
-//    int i;
-
-//    // Decimal equivalent is str[len-1]*1 +
-//    // str[len-1]*m + str[len-1]*(m^2) + ...
-//    for (i = len - 1; i >= 0; i--)
-//    {
-//       // A digit in input number must be
-//       // less than number's base
-//       if (numVal(str[i]) > m)
-//       {
-//          printf("Invalid Number");
-//          return -1;
-//       }
-
-//       num += numVal(str[i]) * power;
-//       power = power * m;
-//    }
-//    return num;
-//}
 
 int Enumerator::base_m_to_decimal(int v, int m)
 {
@@ -639,6 +631,25 @@ int Enumerator::base_m_to_decimal(int v, int m)
     return result;
 }
 
+void Enumerator::base_m_to_decimal(const std::vector<int>& v, int m, vector<int>& list_bits_deci)
+{
+    list_bits_deci.clear();
+    list_bits_deci.reserve(v.size());
+    for(vector<int>::const_iterator it = v.begin(); it != v.end(); it++)
+    {
+        list_bits_deci.push_back(base_m_to_decimal(*it,m));
+    }
+}
+
+void Enumerator::base_computations(int e, int m, std::vector<int>& list_bits_deci)
+{
+    vector<int> e_base_arity;
+    decimal_to_base_m(e,m,e_base_arity);
+    vector<int> list_bits;
+    deinterleave(e_base_arity, m,list_bits);
+    base_m_to_decimal(list_bits, m, list_bits_deci);
+}
+
 int Enumerator::numVal(char c)
 {
     if (c >= '0' && c <= '9')
@@ -647,7 +658,7 @@ int Enumerator::numVal(char c)
         return (int)c - 'A' + 10;
 }
 
-vector<int> Enumerator::deinterleave(vector<int> num, int m)
+void Enumerator::deinterleave(vector<int> num, int m, vector<int>& elemsLin)
 {
     vector<vector<int> > elements;
     for(int i = 0; i < m; i++)
@@ -666,7 +677,8 @@ vector<int> Enumerator::deinterleave(vector<int> num, int m)
             elements[j].push_back(num[i+j]);
         }
     }
-    vector<int> elemsLin;
+    elemsLin.clear();
+    elemsLin.reserve(elements.size());
     for(int i = 0; i < elements.size();i++)
     {
        elemsLin.push_back(0);
@@ -675,7 +687,6 @@ vector<int> Enumerator::deinterleave(vector<int> num, int m)
            elemsLin[i] += elements[i][j] * (pow(10,elements[i].size() - j - 1));
        }
     }
-    return elemsLin;
 }
 vector<string> Enumerator::get_element_of_cartesian_product(
                                                 vector<vector<string> > pools,

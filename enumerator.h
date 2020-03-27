@@ -23,18 +23,20 @@ public:
     std::string generate_specified_solution(int i, int r, int s, int n);
     std::string ith_n_ary_tree(int i);
 
-    std::vector<int> decimal_to_base_m(int decimal, int m);
-    std::vector<int> numberToBase(int n,int b);
+    void decimal_to_base_m(int decimal, int m,std::vector<int>& e_base_arity);
+    void numberToBase(int n,int b, std::vector<int>& digits);
     int base_m_to_decimal(int v, int m);
+    void base_m_to_decimal(const std::vector<int>& v, int m, std::vector<int>& result);
+    void base_computations(int e, int m, std::vector<int>& list_bits_deci);
     
 private:
     //private class members
+    int numVal(char c);
+    void deinterleave(std::vector<int> num, int n, std::vector<int>& elemsLin);
     std::vector<std::string> get_element_of_cartesian_product(std::vector<
                                                std::vector<std::string> > pools,
                                                int repeat=1, int index=0);
     int get_arity_of_term(int start_index, const std::string& tree);
-    int numVal(char c);
-    std::vector<int> deinterleave(std::vector<int> num, int n);
     int findOccurenciesCount(const std::string& data, 
                              const std::string& toSearch);
 
