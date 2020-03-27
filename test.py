@@ -9,6 +9,7 @@ sys.path.append(os.path.join('.', 'pyGOURGS'))
 sys.path.append(os.path.join('.', 'examples'))
 import pyGOURGS.pyGOURGS as pg
 import cython_call as cy
+import pdb
 
 class TestSuite(unittest.TestCase):
 
@@ -30,6 +31,7 @@ class TestSuite(unittest.TestCase):
         self.pset_pg.add_operator('mul', 1)
         self.pset_pg.add_variable('x')
         self.pset_pg.add_variable('y')
+        self.enum_pg = pg.Enumerator(self.pset_pg)
         
     def test_base_one(self):
         self.assertEqual(self.enum.decimal_to_base_m(5,1), [1,1,1,1,1])
@@ -120,5 +122,27 @@ class TestSuite(unittest.TestCase):
         func = pg.compile(soln, self.pset_pg)
         self.assertEqual(type(func), types.FunctionType)
         
+    def test_compare_exhaustive_search_pg_vs_cy(self):
+        for num_trees in range(1, 6):
+            cy_solns = self.enum.exhaustive_global_search(num_trees)
+            py_solns = self.enum_pg.exhaustive_global_search(num_trees)
+            for cy_soln, py_soln in zip(cy_solns, py_solns):          
+                self.assertEqual(cy_soln, py_soln)
+
+    def test_compare_generate_specified_solution(self):
+        for i in [1, 10, 100000, 10000000]:
+            N = i + 1            
+            R_i = self.enum.calculate_R_i(i)
+            S_i = self.enum.calculate_S_i(i)
+            R_i_pg = self.enum_pg.calculate_R_i(i)
+            S_i_pg = self.enum_pg.calculate_S_i(i)
+            r = int(R_i/2)
+            s = int(S_i/2)
+            self.assertEqual(R_i, R_i_pg)
+            self.assertEqual(S_i, S_i_pg)
+            cy_soln = self.enum.generate_specified_solution(i, r, s, N)
+            py_soln = self.enum_pg.generate_specified_solution(i, r, s, N)
+            self.assertEqual(cy_soln.decode('utf-8'), py_soln)
+                
 if __name__ == '__main__':
     unittest.main()
