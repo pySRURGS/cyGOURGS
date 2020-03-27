@@ -39,7 +39,7 @@ private:
                              const std::string& toSearch);
 
 private:
-    // Private date members
+    // Private data members
     PrimitiveSet m_primitiveSet;
     std::vector<int> m_results_for_calculate_Q;
     std::vector<int> m_q;

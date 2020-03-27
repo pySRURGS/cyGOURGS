@@ -11,6 +11,7 @@ import parmap
 import tqdm
 import sys,os
 sys.path.append(os.path.join('..', 'pyGOURGS'))
+sys.path.append(os.path.join('..')
 import pyGOURGS as pg
 import argparse 
 from sqlitedict import SqliteDict

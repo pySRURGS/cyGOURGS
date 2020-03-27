@@ -4,8 +4,8 @@ from distutils.extension import Extension
 import numpy
 
 extensions = [
-    Extension('cython_call', ['cython_call.pyx', '../enumerator.cpp', '../primitiveset.cpp'],
-              include_dirs=[numpy.get_include(), 'c:/boost/boost_1_72_0', '..'],
+    Extension('cython_call', ['cython_call.pyx', 'enumerator.cpp', 'primitiveset.cpp'],
+              include_dirs=[numpy.get_include(), 'c:/boost/boost_1_72_0', '.'],
               language='c++',
               extra_compile_args=["-std=c++11"],
               extra_link_args=["-std=c++11"]
