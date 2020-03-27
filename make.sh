@@ -9,4 +9,7 @@ elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]; then
         main.cpp -o main.exe
 fi
 
+# now compile the cython code
+# Tested on Python 3.6
+python setup.py build_ext --inplace
 
