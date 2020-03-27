@@ -130,7 +130,7 @@ class TestSuite(unittest.TestCase):
                 self.assertEqual(cy_soln, py_soln)
 
     def test_compare_generate_specified_solution(self):
-        for i in [1, 10, 100000, 10000000]:
+        for i in [1, 10, 1000, 10000]:
             N = i + 1            
             R_i = self.enum.calculate_R_i(i)
             S_i = self.enum.calculate_S_i(i)
@@ -145,4 +145,4 @@ class TestSuite(unittest.TestCase):
             self.assertEqual(cy_soln.decode('utf-8'), py_soln)
                 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)
