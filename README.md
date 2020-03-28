@@ -1,4 +1,4 @@
-![Binoculars](cyGOURGS.svg)
+![Binoculars](images/cyGOURGS.svg)
 
 [![Build Status](https://travis-ci.org/pySRURGS/cyGOURGS.svg?branch=master)](https://travis-ci.org/pySRURGS/cyGOURGS)
 [![License: GPL v3](images/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
