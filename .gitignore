@@ -8,8 +8,6 @@
 build/
 *.pyd
 *.db
-/examples/cython_call.cpp
-/examples/enumerator_call.cpp
 /.coverage
 /examples/.coverage
 cython_call.cpp

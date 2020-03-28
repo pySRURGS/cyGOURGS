@@ -59,9 +59,6 @@ def get_element_of_cartesian_product(*args, repeat=1, index=0):
     -------
     ith_item: the `index`th element of the cartesian product
     """
-    if repeat == 0:
-        xxxx = 9
-        xxxx = xxxx + 3
     pools = [tuple(pool) for pool in args] * repeat
     if len(pools) == 0:
         return []
