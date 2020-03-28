@@ -502,7 +502,8 @@ class Enumerator(object):
         Returns
         -------
         G_i_b : int
-            the number of possible configurations of operators of arity `arities`[b]
+            the number of possible configurations of operators of arity 
+            `arities`[b]
         """
         arities = self._pset.get_arities()
         f_b = len(self._operators[arities[b]])
@@ -556,9 +557,6 @@ class Enumerator(object):
         if i == 0:
             return 1
         R_i = 1.0
-        if i == 918:
-            xx = 1
-            xx = xx + 4
         all_G_i_b = self.calculate_all_G_i_b(i)
         for G_i_b in all_G_i_b:            
             if G_i_b != 0:
@@ -591,12 +589,15 @@ class Enumerator(object):
         else:
             e, j = divmod(i-1, k) 
             m = arities[j]
-            e_base_arity = decimal_to_base_m(e, m)
-            list_bits = deinterleave(e_base_arity, m)
-            list_bits_deci = [base_m_to_decimal(u, m) \
-                                 for u in list_bits]
-            for i_deinterleaved in list_bits_deci:
-                a_i = a_i + self.calculate_a_i(i_deinterleaved)                
+            if m == 1:
+                a_i = self.calculate_a_i(e)
+            else:
+                e_base_arity = decimal_to_base_m(e, m)
+                list_bits = deinterleave(e_base_arity, m)
+                list_bits_deci = [base_m_to_decimal(u, m) \
+                                     for u in list_bits]
+                for i_deinterleaved in list_bits_deci:
+                    a_i = a_i + self.calculate_a_i(i_deinterleaved)                
         return a_i
         
     @mt_lru_cache(maxsize=cache_size)
@@ -703,7 +704,7 @@ class Enumerator(object):
             arity = arities[b]
             l_i_b = self.calculate_l_i_b(i, b)
             config = get_element_of_cartesian_product(pset._operators[arity],
-                                                           repeat=l_i_b, index=z)
+                                                          repeat=l_i_b, index=z)
             operator_config.append(config)
         # generate the terminal configuration
         a_i = self.calculate_a_i(i)
@@ -780,14 +781,10 @@ class Enumerator(object):
         candidate_solution: string
             The candidate solution generated
         """
-        if seed is not None and type(seed) != list:
+        if seed is not None:
             random.seed(seed)
-        if type(seed) == list and len(seed) == num_soln:
-            for j in range(0, num_soln):
-                yield self.uniform_random_global_search_once(N, seed[j])
-        else:
-            for j in range(0, num_soln):
-                yield self.uniform_random_global_search_once(N)
+        for j in range(0, num_soln):
+            yield self.uniform_random_global_search_once(N)
         
     def exhaustive_global_search(self, N, max_iters=None):
         """
@@ -823,7 +820,8 @@ class Enumerator(object):
                     candidate_solution = self.generate_specified_solution(i,
                                                                     r, s, N)                    
                     yield candidate_solution
-        
+
+                    
 def compile(expr, pset):
     """
     Compiles the `expr` expression
@@ -925,7 +923,8 @@ class ResultList(object):
         Sorts the results in the result list by decreasing value of mean squared 
         error.
         """
-        self._results = sorted(self._results, key=lambda x: x._score, reverse=True)
+        self._results = sorted(self._results, key=lambda x: x._score, 
+                               reverse=True)
 
     def count_nodes(self):
         """
@@ -937,8 +936,8 @@ class ResultList(object):
         
     def print(self, top=2):
         """
-        Prints the score for the top results in the database. Run `self.sort` prior 
-        to executing `self.print`.
+        Prints the score for the top results in the database. Run `self.sort` 
+        prior to executing `self.print`.
         
         Parameters
         ----------
@@ -960,4 +959,14 @@ class ResultList(object):
         print(table_string)
 
 
-    
+if __name__ == '__main__':
+    ps = PrimitiveSet()
+    ps.add_operator('add', 2)
+    ps.add_operator('sub', 2)
+    ps.add_operator('div', 2)
+    ps.add_operator('cos', 1)
+    ps.add_operator('progn3', 3)
+    ps.add_variable('x')
+    ps.add_variable('y')
+    en = Enumerator(ps)
+    print(en.uniform_random_global_search_once(1000))
