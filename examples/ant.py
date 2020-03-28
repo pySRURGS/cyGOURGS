@@ -195,7 +195,7 @@ if __name__ == "__main__":
     parser.add_argument("-deterministic", help="should algorithm be run in deterministic manner?", type=str2bool, default=False)
     parser.add_argument("-exhaustive", help="should algorithm be run in exhaustive/brute-force mode? This can run forever if you are not careful.", type=str2bool, default=False)
     parser.add_argument("-multiprocessing", help="should algorithm be run in multiprocessing mode?", type=str2bool, default=False)
-    parser.add_argument("-cppimpl", help="should use cpp implementation of algorithms?(True - cpp False - python)", type=str2bool, default=False)
+    parser.add_argument("-cppimpl", help="should use cpp implementation of algorithms?(True - cpp False - python)", type=str2bool, default=True)
     if len(sys.argv) < 2:
         parser.print_usage()
         sys.exit(1)
