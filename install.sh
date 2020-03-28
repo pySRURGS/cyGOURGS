@@ -1,7 +1,6 @@
 # download the boost c++ package
-cd ~
-wget http://downloads.sourceforge.net/project/boost/boost/1.72.0/boost_1_72_0.tar.gz
-tar -zxf boost_1_72_0.tar.gz
+wget -O ~/boost_1_72_0.tar.gz http://downloads.sourceforge.net/project/boost/boost/1.72.0/boost_1_72_0.tar.gz --no-check-certificate
+tar  -C ~ -zxf ~/boost_1_72_0.tar.gz 
 # compile the main.exe, demonstrating that codes of core functionality compile
 if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     path_to_boost=~/boost_1_72_0
