@@ -28,13 +28,15 @@ and computational optimization.
 
 ## Installing
 
-Prerequisite software includes: Python3.6, terminal, gcc, wget, and tar.
+Prerequisite software includes: Python3.6, terminal, and gcc.
 
 ### On Linux 
+This is the preferred platform as it is very easy to install on Ubuntu Linux.
 On Ubuntu 18.04 Linux, everything but the Boost C++ codes are preinstalled by your distribution.
+You can install boost using "sudo apt-get install libboost-dev"
 
 ### On Windows
-On Windows, users would need to install Python3.6 if they do not have it installed [download](https://www.python.org/ftp/python/3.6.3/python-3.6.3-amd64.exe). Windows users will need to download [git](https://git-scm.com/download/win) to use git bash. Windows users will also need to install MinGW64 [download](https://sourceforge.net/projects/mingw/) in order to use gcc, wget, and tar.
+Users would need to install Python3.6 if they do not have it installed [download](https://www.python.org/ftp/python/3.6.3/python-3.6.3-amd64.exe). They will need to download [git](https://git-scm.com/download/win) to use git bash. They will also need to install MinGW64 [download](https://sourceforge.net/projects/mingw/) in order to use gcc.  Windows users will also need to install boost [download](https://dl.bintray.com/boostorg/release/1.72.0/source/) and then edit the `boost_path = '.'` variable in `setup.py` and the `path_to_boost` variable in `install.sh` to point to the directory where the `boost` subdirectory is housed. 
 
 ### On Both Linux and Windows
 
@@ -45,7 +47,7 @@ git clone https://github.com/pySRURGS/cyGOURGS.git
 cd cyGOURGS
 ```
 
-Then, you can download the boost c++ package version 1.72 and compile the code using
+Then, you can compile the code using
 
 ```
 bash install.sh
