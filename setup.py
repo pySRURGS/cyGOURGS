@@ -3,18 +3,11 @@ from Cython.Build import cythonize
 from distutils.extension import Extension
 import numpy
 import sys
-try:
-    import sh
-except ImportError: # on Windows
-    # fallback: emulate the sh API with pbs
-    import pbs
+import pdb
 
-    class Sh(object):
-        def __getattr__(self, attr):
-            return pbs.Command(attr)
-    sh = Sh()
-
-boost_path = sh.echo('~').strip() + '/boost_1_72_0'
+# On Windows, the user needs to specify the path where they installed boost
+# Edit the following variable to reflect the correct path.
+boost_path = '.'
 
 extensions = [
     Extension('cython_call', ['cython_call.pyx', 

@@ -8,5 +8,3 @@ sqlitedict==1.6.0
 tabulate==0.8.3
 parmap==1.5.2
 tqdm==4.32.2
-sh==1.12.14
-pbs==0.110
