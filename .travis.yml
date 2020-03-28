@@ -14,7 +14,7 @@ matrix:
         - "pip install coveralls"
         - "bash make.sh"
       # command to run tests
-      script: pytest --cov=cyGOURGS -s ./test.py
+      script: python ./test.py
       
   notifications:
     email:
