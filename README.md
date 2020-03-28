@@ -6,10 +6,9 @@
 
 # Global Optimization by Uniform Random Global Search
 
-Users who are unfamiliar with this software or with C++ should refer to the 
+Users who are unfamiliar with GOURGS should refer to the 
 python version of this same software [pyGOURGS](https://github.com/pySRURGS/pyGOURGS). 
-This is a C++ port of pyGOURGS, produced to increase the performance of the 
-software.
+This is a C++/Cython port of pyGOURGS created for improved performance.
 
 This software package solves problems whose solutions can be represented as 
 n-ary trees. These problems are typically solved using genetic programming. 
