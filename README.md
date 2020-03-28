@@ -1,6 +1,6 @@
 ![Binoculars](cyGOURGS.svg)
 
-WORK-IN-PROGRESS (NOT FINISHED)
+[![Build Status](https://travis-ci.org/pySRURGS/cyGOURGS.svg?branch=master)](https://travis-ci.org/pySRURGS/cyGOURGS)
 
 # Global Optimization by Uniform Random Global Search
 
@@ -27,37 +27,34 @@ and computational optimization.
 4. Memoization of methods for speed
 5. API is similar to that of the popular DEAP genetic programming software
 
-## Getting Started
-
-The software is run using C++11. It is run using the terminal.
-
 ## Installing
 
-You can install directly from github via the repository.
+Prerequisite software includes: Python3.6, terminal, gcc, wget, and tar.
+
+### On Linux 
+On Ubuntu 18.04 Linux, everything but the Boost C++ codes are preinstalled by your distribution.
+
+### On Windows
+On Windows, users would need to install Python3.6 if they do not have it installed [download](https://www.python.org/ftp/python/3.6.3/python-3.6.3-amd64.exe). Windows users will need to download [git](https://git-scm.com/download/win) to use git bash. Windows users will also need to install MinGW64 [download](https://sourceforge.net/projects/mingw/) in order to use gcc, wget, and tar.
+
+### On Both Linux and Windows
+
+Copy the repository to your computer using git bash using the following commands.
 
 ```
 git clone https://github.com/pySRURGS/cyGOURGS.git
 cd cyGOURGS
 ```
 
-You need to have the `boost` library installed/downloaded.
+Then, you can download the boost c++ package version 1.72 and compile the code using
 
-On Linux, you can download [boost_1_72_0](https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz) and unzip the `boost_1_72_0` folder to `~/boost/boost_1_72_0`.
-
-The bash commands to do this are:
 ```
-curl https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz --output ~/boost_1_72_0.tar.gz
-tar -xvf ~/boost_1_72_0.tar.gz -C ~/boost/boost_1_72_0
+bash install.sh
 ```
 
-On Windows, you can download [boost_1_72_0](https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.zip) and unzip the `boost_1_72_0` folder to `C:/boost/boost_1_72_0`.
+## Usage
 
-After downloading `boost`, run the following commands using the terminal (git bash terminal on Windows),
-```
-bash make.sh
-cd examples
-bash cybuild.sh
-```
+Users of pyGOURGS are referred to the similarly named `ant.py` in `./cyGOURGS/examples/ant.py` which has an identical interface with the addition of the `cppimpl` flag, which uses the C++ cyGOURGS when `True` and which uses the python3 pyGOURGS when `False`.
 
 ## Authorship
 
@@ -71,7 +68,9 @@ This project is licensed under the GPL 3.0 License - see the [LICENSE](LICENSE.t
 
 ## How to Cite
 
-If you use this software in your research, then please cite our papers.
+If you use this software in your research, then please cite us.
+
+Towfighi, S., (2020). pyGOURGS - global optimization of n-ary tree representable problems using uniform random global search. Journal of Open Source Software, 5(47), 2074, https://doi.org/10.21105/joss.02074
 
 ## Community
 
