@@ -37,7 +37,13 @@ On Ubuntu 18.04 Linux, everything but the Boost C++ codes are preinstalled by yo
 You can install boost using "sudo apt-get install libboost-dev"
 
 ### On Windows
-Users would need to install Python3.6 if they do not have it installed [download](https://www.python.org/ftp/python/3.6.3/python-3.6.3-amd64.exe). They will need to download [git](https://git-scm.com/download/win) to use git bash. They will also need to install MinGW64 [download](https://sourceforge.net/projects/mingw/) in order to use gcc.  Windows users will also need to install boost [download](https://dl.bintray.com/boostorg/release/1.72.0/source/) and then edit the `boost_path = '.'` variable in `setup.py` and the `path_to_boost` variable in `install.sh` to point to the directory where the `boost` subdirectory is housed. 
+Install Python3.6 if you do not have it installed: [link](https://www.python.org/ftp/python/3.6.3/python-3.6.3-amd64.exe). 
+
+Install git to use git bash: [link](https://git-scm.com/download/win)
+
+Install MinGW64 in order to use gcc: [link](https://sourceforge.net/projects/mingw/) 
+
+Install boost [download](https://dl.bintray.com/boostorg/release/1.72.0/source/) and edit the `boost_path = '.'` variable in `setup.py` and the `path_to_boost` variable in `install.sh` to point to the `boost_1_72_0` directory.
 
 ### On Both Linux and Windows
 
