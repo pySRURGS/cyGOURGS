@@ -43,11 +43,11 @@ Install git to use git bash: [link](https://git-scm.com/download/win)
 
 Install MinGW64 in order to use gcc: [link](https://sourceforge.net/projects/mingw/) 
 
-Install boost [link](https://dl.bintray.com/boostorg/release/1.72.0/source/) and edit the `boost_path = '.'` variable in `setup.py` and the `path_to_boost` variable in `install.sh` to point to the `boost_1_72_0` directory.
+Install boost ([link](https://dl.bintray.com/boostorg/release/1.72.0/source/)) and edit the `boost_path = '.'` variable in `setup.py` and the `path_to_boost` variable in `install.sh` to point to the `boost_1_72_0` directory on your computer.
 
 ### On Both Linux and Windows
 
-Copy the repository to your computer using git bash using the following commands.
+Copy the repository to your computer using terminal (git bash on Windows) using the following commands.
 
 ```
 git clone https://github.com/pySRURGS/cyGOURGS.git
