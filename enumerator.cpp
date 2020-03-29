@@ -1,14 +1,21 @@
+/*
+
+The implementation of the global optimization by uniform random global search
+(GOURGS) enumerator class in C++.
+
+Authors: Razvan Tarnovan, Sohrab Towfighi 
+Copyright: Sohrab Towfighi 2020
+
+*/
+
 #include <time.h>
-//#include <sys/time.h>
 #include <stdio.h>
 #include <string>
 #include <random>
 #include <chrono>
-
 #include "enumerator.h"
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/random/discrete_distribution.hpp"
-
 #include <sstream>
 
 namespace patch
@@ -35,33 +42,37 @@ void Enumerator::init(PrimitiveSet primitiveSet)
 std::vector<std::string> Enumerator::exhaustive_global_search(int n, 
                                                               int max_iters)
 {
-    // Yields (this is a generator) candidate solutions incrementally 
-    // increasing the operator/terminals configurations indices and tree index 
-    // iterator
+    /* 
+    Produces a list of candidate solutions by incrementally increasing the 
+    operator/terminals configurations indices (r, and s). When these values
+    are maxed out for a given tree index, the tree index is incremented.
     
-    // Parameters
-    // ----------
+    Parameters
+    ----------
 
-    // N: int 
-        // User specified maximum complexity index
+    n: int 
+        User specified number of permitted trees. As n increases, the search 
+        space becomes larger and trees become more complex.
     
-    // max_iters: int
-        // The maximum number of solutions which can be considered. Will 
-        // overrule `N` in terms of cutting off the run.
+    max_iters: int
+        The maximum number of solutions which can be considered. If set to zero,
+        the search will consider all possible solutions up to and including a 
+        tree of complexity `i == n`. 
         
-    // Yields
-    // -------
-    // candidate_solution: string
-        // The candidate solution generated
+    Returns 
+    -------
+    candidate_solutions: std::vector<std::string>
+        A vector of strings, with each string being a candidate solution. 
+    */
     int iters = 1;
     vector<string> candidate_solutions;
     for(int i = 0; i < n; i++)
     {
-        int r_i = calculate_R_i(i);
-        int s_i = calculate_S_i(i);
-        for(int r=0;r<r_i;r++)
+        int R_i = calculate_R_i(i);
+        int S_i = calculate_S_i(i);
+        for(int r=0; r < R_i; r++)
         {
-            for(int s=0;s<s_i;s++)
+            for(int s=0; s < S_i; s++)
             {
                 candidate_solutions.push_back(generate_specified_solution(i, 
                                                                     r, s, n));
@@ -79,26 +90,52 @@ std::vector<std::string> Enumerator::uniform_random_global_search(int n,
                                                                   int num_iters, 
                                                         std::vector<long> seeds)
 {
-    vector<string> soln;
+    /* 
+    Produces a list of candidate solutions by randomly sampling from the set of
+    operator/terminals configurations indices (r_i, and s_i), ensuring that the 
+    probably of selecting a given tree `i` in `{0,...,n}` is proportional to 
+    the number of possible equations in the `i^{th}` tree.
+    
+    Parameters
+    ----------
+
+    n: int 
+        User specified number of permitted trees. As n increases, the search 
+        space becomes larger and trees become more complex.
+    
+    num_iters: int
+        The number of solutions which will be considered. 
+        
+    seeds: std::vector<long>
+        Every time we run uniform_random_global_search_once, we supply it a 
+        different random seed. This implementation was deemed necessary because 
+        during multiprocessing runs, different processes were being given the 
+        same seed, and so were producing identical output.
+        
+    Returns 
+    -------
+    solutions: std::vector<std::string>
+        A vector of strings, with each string being a candidate solution. 
+    */
+    vector<string> solutions;
     if(seeds.size() > 0 && num_iters != seeds.size())
     {
         cerr << "Enumerator::uniform_random_global_search: invalid seeds number" 
                                                                         << endl;
-        return soln;
+        return solutions;
     }
     for(int i=0;i<num_iters;i++)
     {
         if(seeds.size() > 0)
-            soln.push_back(uniform_random_global_search_once(n, seeds[i]));
+            solutions.push_back(uniform_random_global_search_once(n, seeds[i]));
         else
-            soln.push_back(uniform_random_global_search_once(n));
+            solutions.push_back(uniform_random_global_search_once(n));
     }
-    return soln;
+    return solutions;
 }
 
 string Enumerator::uniform_random_global_search_once(int n, long seed)
 {
-    //printf("\nEnumerator::uniform_random_global_search_once begin\n");
     vector<int> weights = calculate_Q(n);
     double sum_of_weight = 0;
     for(int j=0; j<n; j++) {
@@ -117,7 +154,8 @@ string Enumerator::uniform_random_global_search_once(int n, long seed)
     if( seed == LONG_MAX)
     {
         auto duration = std::chrono::system_clock::now().time_since_epoch();
-        auto nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
+        auto nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                                              duration).count();
         gen.seed(nanos);
     }
 
