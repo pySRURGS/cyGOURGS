@@ -46,8 +46,8 @@ private:
     std::vector<int> m_results_for_calculate_Q;
     std::vector<int> m_q;
     std::map<int, std::vector<int> > m_all_g_is;
-    std::map<int,int> m_s_is;
-    std::map<int,int> m_r_is;
+    std::map<int,int> m_s_i_values;
+    std::map<int,int> m_r_i_values;
 };
 
 #endif // ENUMERATOR_H

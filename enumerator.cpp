@@ -136,6 +136,31 @@ std::vector<std::string> Enumerator::uniform_random_global_search(int n,
 
 string Enumerator::uniform_random_global_search_once(int n, long seed)
 {
+    /* 
+    Produces a candidate solution by randomly sampling from the set of
+    operator/terminals configurations indices (r_i, and s_i), ensuring that the 
+    probably of selecting a given tree `i` in `{0,...,n}` is proportional to 
+    the number of possible equations in the `i^{th}` tree.
+    
+    Parameters
+    ----------
+
+    n: int 
+        User specified number of permitted trees. As n increases, the search 
+        space becomes larger and trees become more complex.
+    
+    seed: long (default == LONG_MAX)
+        Every time we run uniform_random_global_search_once, we supply it a 
+        different random seed. This implementation was deemed necessary because 
+        during multiprocessing runs, different processes were being given the 
+        same seed since they ran at the same time, and so were producing 
+        identical output.
+        
+    Returns 
+    -------
+    solution: std::string
+        a candidate solution. 
+    */
     vector<int> weights = calculate_Q(n);
     double sum_of_weight = 0;
     for(int j=0; j<n; j++) {
@@ -150,8 +175,8 @@ string Enumerator::uniform_random_global_search_once(int n, long seed)
     if( seed != LONG_MAX )
     {
         gen.seed(seed);
-    }
-    if( seed == LONG_MAX)
+    }    
+    if( seed == LONG_MAX ) // default value
     {
         auto duration = std::chrono::system_clock::now().time_since_epoch();
         auto nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -162,23 +187,36 @@ string Enumerator::uniform_random_global_search_once(int n, long seed)
     boost::random::discrete_distribution<> weightdist(norm_weights.begin(), 
                                                             norm_weights.end());
     int i = weightdist(gen);
-    int r_i = calculate_R_i(i);
-    int s_i = calculate_S_i(i);
-    boost::random::uniform_int_distribution<> r_dist(0, r_i - 1);
-    boost::random::uniform_int_distribution<> s_dist(0, s_i - 1);
+    int R_i = calculate_R_i(i);
+    int S_i = calculate_S_i(i);
+    boost::random::uniform_int_distribution<> r_dist(0, R_i - 1);
+    boost::random::uniform_int_distribution<> s_dist(0, S_i - 1);
     int r = r_dist(gen);
     int s = s_dist(gen);
-    //    int i = 918;
-    // int r = 27; int s = 31625;
-    //printf("\ni: %d, r: %d, s: %d, n: %d\n",i,r,s,n);
     string candidate_solution = generate_specified_solution(i, r, s, n);
     return candidate_solution;
 }
 
 int Enumerator::calculate_R_i(int i)
 {
-    std::map<int, int>::iterator it = m_r_is.find(i);
-    if(it != m_r_is.end())
+    /*
+    Calculates the number of possible configurations of operators in the 
+    `i`th tree.
+
+    Parameters
+    ----------
+    i: int
+        A non-negative integer which will be used to map to a unique n-ary 
+        trees
+
+    Returns
+    -------
+    R_i: int
+        The number of possible configurations of operators in the `i`th 
+        tree
+    */
+    std::map<int, int>::iterator it = m_r_i_values.find(i);
+    if(it != m_r_i_values.end())
     {
         return it->second;
     }
@@ -196,23 +234,37 @@ int Enumerator::calculate_R_i(int i)
             r_i = r_i * g_i_b;
         }
     }
-    m_r_is[i] = r_i;
+    m_r_i_values[i] = r_i;
     return r_i;
 }
 
 int Enumerator::calculate_S_i(int i)
 {
-    std::map<int, int>::iterator it = m_s_is.find(i);
-    if(it != m_s_is.end())
+    /*
+    Calculates the number of possible configurations of terminals in the 
+    `i`th tree.
+
+    Parameters
+    ----------
+    i: int
+        A non-negative integer which will be used to map to a unique n-ary 
+        trees
+
+    Returns
+    -------
+    S_i: int
+        The number of possible configurations of terminals in the `i`th 
+        tree
+    */
+    std::map<int, int>::iterator it = m_s_i_values.find(i);
+    if(it != m_s_i_values.end())
     {
         return it->second;
     }
     int m = m_primitiveSet.get_terminals().size();
     int j_i = calculate_a_i(i);
-    //TODO: remove usage of mempower and use pow instead, m and j_i have 
-    // small values
     int s_i = pow(m, j_i);
-    m_s_is[i] = s_i;
+    m_s_i_values[i] = s_i;
     return s_i;
 }
 
@@ -231,6 +283,19 @@ int Enumerator::get_Q(int n)
 
 vector<int> Enumerator::calculate_Q(int n)
 {
+    /*
+    Calculates the number of total number of solutions in the solution space
+
+    Parameters
+    ----------
+    N: int 
+        User specified maximum complexity index
+
+    Returns
+    -------
+    Q: vector<int>
+        The number of possible solutions for each value of `i` in {0, ..., n-1}
+    */
     int q = 0;
     int r_i;
     int s_i;
@@ -239,7 +304,7 @@ vector<int> Enumerator::calculate_Q(int n)
     {
         return m_results_for_calculate_Q;
     }
-    for(int i=0;i<n;i++)
+    for(int i=0; i<n; i++)
     {
         r_i = calculate_R_i(i);
         s_i = calculate_S_i(i);
@@ -272,6 +337,25 @@ vector<int> Enumerator::calculate_all_G_i_b(int i)
 
 int Enumerator::calculate_G_i_b(int i, int b)
 {
+    /*
+    Calculates the number of possible configurations of operators of arity 
+    arities[`b`] in the `i`th tree.
+
+    Parameters
+    ----------
+    i: int
+        A non-negative integer which will be used to map to a unique n-ary 
+        trees
+
+    b: int
+        Maps via `arities[b]` to the arity of operators being considered
+
+    Returns
+    -------
+    G_i_b : int
+        the number of possible configurations of operators of arity 
+        `arities`[b]
+    */
     vector<int> arities = m_primitiveSet.get_arities();
     int f_b = m_primitiveSet.get_operators(arities[b]).size();
     int l_i_b = calculate_l_i_b(i, b);
@@ -281,6 +365,23 @@ int Enumerator::calculate_G_i_b(int i, int b)
 
 int Enumerator::calculate_l_i_b(int i, int b)
 {
+    /*
+    Calculates the number of nonterminal nodes with arity `arities[b]` in 
+    tree `i`
+
+    Parameters
+    ----------
+    i: int
+        A non-negative integer which will be used to map to a unique n-ary 
+        trees
+
+    b: int 
+        Maps via `arities`[b] to the arity of operators being considered
+
+    Returns
+    -------
+    l_i_b: int   
+    */
     vector<int> arities = m_primitiveSet.get_arities();
     int k = arities.size();
     int l_i_b;
