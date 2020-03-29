@@ -108,21 +108,35 @@ class TestSuite(unittest.TestCase):
         self.assertEqual(self.enum.calculate_S_i(4),2)
         self.assertEqual(self.enum.calculate_S_i(5),4)
          
-    def test_uniform_random_global_search(self):
-        solns = []
-        for soln in self.enum.uniform_random_global_search(10000, 10):
+    def test_uniform_random_global_search(self):        
+        for i in range(0, 10):
+            soln = self.enum.uniform_random_global_search_once(10000, i)
+            soln_pg = self.enum_pg.uniform_random_global_search_once(10000, i)
+            func = pg.compile(soln, self.pset_pg)
+            self.assertEqual(type(func), types.FunctionType)
+            func_pg = pg.compile(soln_pg, self.pset_pg)
+            self.assertEqual(type(func_pg), types.FunctionType)
+
+    def test_timing_and_uniqueness_random_search(self):
+        iters = 100
+        init = time.time()
+        solns = list()
+        solns_pg = list()
+        for i in range(0, iters):
+            soln = self.enum.uniform_random_global_search_once(10000, i)
             solns.append(soln)
-        self.assertEqual(len(solns), len(list(set(solns))), 10)
-        soln = self.enum.uniform_random_global_search_once(10000)
-        self.assertEqual(type(soln), str)
-        solns = []
-        for soln in self.enum.exhaustive_global_search(2,5):
-            solns.append(soln)
-        self.assertEqual(len(solns), 5)
-        func = pg.compile(soln, self.pset_pg)
-        self.assertEqual(type(func), types.FunctionType)
+        delta = time.time() - init
+        for i in range(0, iters):    
+            soln_pg = self.enum_pg.uniform_random_global_search_once(10000, i)
+            solns_pg.append(soln_pg)
+        delta_pg = time.time() - delta - init
+        self.assertGreater(delta_pg, 50*delta)
+        n_unique = len(list(set(solns)))
+        n_unique_pg = len(list(set(solns_pg)))
+        self.assertGreater(n_unique, 0.98*iters)
+        self.assertGreater(n_unique_pg, 0.98*iters)
         
-    def test_compare_exhaustive_search_pg_vs_cy(self):
+    def test_compare_exhaustive_search_pg_vs_cy(self):        
         for num_trees in range(1, 6):
             cy_solns = self.enum.exhaustive_global_search(num_trees)
             py_solns = self.enum_pg.exhaustive_global_search(num_trees)
@@ -143,6 +157,7 @@ class TestSuite(unittest.TestCase):
             cy_soln = self.enum.generate_specified_solution(i, r, s, N)
             py_soln = self.enum_pg.generate_specified_solution(i, r, s, N)
             self.assertEqual(cy_soln.decode('utf-8'), py_soln)
-                
+            
+            
 if __name__ == '__main__':
     unittest.main(verbosity=2)

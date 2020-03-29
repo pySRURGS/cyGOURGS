@@ -344,19 +344,19 @@ string Enumerator::generate_specified_solution(int i, int r, int s, int n)
     {
         msg = "Enumerator::generate_specified_solution: invalid operator";
         cerr << msg << endl;
-        return msg;
+        throw 2;
     }
     if((s >= s_i)  || (s < 0))
     {
         msg = "Enumerator::generate_specified_solution InvalidTreeIndex" ; 
         cerr << msg << endl;
-        return msg;
+        throw 2;
     }
     if (i > n)
     {
         msg = "Enumerator::generate_specified_solution InvalidTreeIndex i>n";
         cerr << msg << endl;
-        return msg;
+        throw 2;
     }
     string tree = "";
     tree = ith_n_ary_tree(i);

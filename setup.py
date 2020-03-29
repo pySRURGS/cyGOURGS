@@ -7,7 +7,7 @@ import pdb
 
 # On Windows, the user needs to specify the path where they installed boost
 # Edit the following variable to reflect the correct path.
-boost_path = '.'
+boost_path = 'c:/boost/boost_1_72_0'
 
 extensions = [
     Extension('cython_call', ['cython_call.pyx', 
