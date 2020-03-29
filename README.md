@@ -29,8 +29,6 @@ and computational optimization.
 
 ## Installing
 
-Prerequisite software includes: Python3.6, terminal, and gcc.
-
 ### On Linux 
 This is the preferred platform as it is very easy to install on Ubuntu Linux.
 On Ubuntu 18.04 Linux, everything but the Boost C++ codes are preinstalled by your distribution.
