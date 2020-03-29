@@ -23,10 +23,11 @@ public:
     std::string generate_specified_solution(int i, int r, int s, int n);
     std::string ith_n_ary_tree(int i);
 
-    void decimal_to_base_m(int decimal, int m,std::vector<int>& e_base_arity);
+    void decimal_to_base_m(int decimal, int m, std::vector<int>& e_base_arity);
     void numberToBase(int n,int b, std::vector<int>& digits);
     int base_m_to_decimal(int v, int m);
-    void base_m_to_decimal(const std::vector<int>& v, int m, std::vector<int>& result);
+    void base_m_to_decimal(const std::vector<int>& v, int m, 
+                           std::vector<int>& result);
     void base_computations(int e, int m, std::vector<int>& list_bits_deci);
     
 private:
