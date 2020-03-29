@@ -6,10 +6,9 @@
 
 # Global Optimization by Uniform Random Global Search
 
-Users who are unfamiliar with this software or with C++ should refer to the 
+Users who are unfamiliar with GOURGS should refer to the 
 python version of this same software [pyGOURGS](https://github.com/pySRURGS/pyGOURGS). 
-This is a C++ port of pyGOURGS, produced to increase the performance of the 
-software.
+This is a C++/Cython port of pyGOURGS created for improved performance.
 
 This software package solves problems whose solutions can be represented as 
 n-ary trees. These problems are typically solved using genetic programming. 
@@ -30,19 +29,23 @@ and computational optimization.
 
 ## Installing
 
-Prerequisite software includes: Python3.6, terminal, and gcc.
-
 ### On Linux 
 This is the preferred platform as it is very easy to install on Ubuntu Linux.
 On Ubuntu 18.04 Linux, everything but the Boost C++ codes are preinstalled by your distribution.
 You can install boost using "sudo apt-get install libboost-dev"
 
 ### On Windows
-Users would need to install Python3.6 if they do not have it installed [download](https://www.python.org/ftp/python/3.6.3/python-3.6.3-amd64.exe). They will need to download [git](https://git-scm.com/download/win) to use git bash. They will also need to install MinGW64 [download](https://sourceforge.net/projects/mingw/) in order to use gcc.  Windows users will also need to install boost [download](https://dl.bintray.com/boostorg/release/1.72.0/source/) and then edit the `boost_path = '.'` variable in `setup.py` and the `path_to_boost` variable in `install.sh` to point to the directory where the `boost` subdirectory is housed. 
+Install Python3.6 if you do not have it installed: [link](https://www.python.org/ftp/python/3.6.3/python-3.6.3-amd64.exe). 
+
+Install git to use git bash: [link](https://git-scm.com/download/win)
+
+Install MinGW64 in order to use gcc: [link](https://sourceforge.net/projects/mingw/) 
+
+Install boost ([link](https://dl.bintray.com/boostorg/release/1.72.0/source/)) and edit the `boost_path = '.'` variable in `setup.py` and the `path_to_boost` variable in `install.sh` to point to the `boost_1_72_0` directory on your computer.
 
 ### On Both Linux and Windows
 
-Copy the repository to your computer using git bash using the following commands.
+Copy the repository to your computer using terminal (git bash on Windows) using the following commands.
 
 ```
 git clone https://github.com/pySRURGS/cyGOURGS.git
