@@ -29,32 +29,16 @@ and computational optimization.
 
 ## Installing
 
-### On Linux 
-This is the preferred platform as it is very easy to install on Ubuntu Linux.
-On Ubuntu 18.04 Linux, everything but the Boost C++ codes are preinstalled by your distribution.
-You can install boost using "sudo apt-get install libboost-dev"
+### On Ubuntu 18.04
 
-### On Windows
-Install Python3.6 if you do not have it installed: [link](https://www.python.org/ftp/python/3.6.3/python-3.6.3-amd64.exe). 
+Everything but the Boost C++ codes are preinstalled by your distribution. You can install boost using `sudo apt-get install libboost-dev`
 
-Install git to use git bash: [link](https://git-scm.com/download/win)
-
-Install MinGW64 in order to use gcc: [link](https://sourceforge.net/projects/mingw/) 
-
-Install boost ([link](https://dl.bintray.com/boostorg/release/1.72.0/source/)) and edit the `boost_path` variable in `setup.py` and the `path_to_boost` variable in `install.sh` to point to the `boost_1_72_0` directory on your computer.
-
-### On Both Linux and Windows
-
-Copy the repository to your computer using terminal (git bash on Windows) using the following commands.
+Copy the repository to your computer and install using terminal:
 
 ```
 git clone https://github.com/pySRURGS/cyGOURGS.git
 cd cyGOURGS
-```
-
-Then, you can compile the code using
-
-```
+pip3 install -r requirements.txt --user
 bash install.sh
 ```
 
