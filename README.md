@@ -34,7 +34,7 @@ and computational optimization.
 Everything but the Boost C++ codes are preinstalled by your distribution. You can install boost using 
 
 ```
-sudo apt-get install libboost-dev`
+sudo apt-get install libboost-dev
 ```
 
 Copy the repository to your computer and install using terminal:
