@@ -86,8 +86,9 @@ optional arguments:
   -multiprocessing MULTIPROCESSING
                         should algorithm be run in multiprocessing mode?
                         (default: False)
-  -cppimpl CPPIMPL      should use cpp implementation of algorithms?(True -
-                        cpp False - python) (default: True)
+  -cppimpl CPPIMPL      should use cpp implementation of algorithms? (If True,
+                        use C++ implementation. Else if False, use pyGOURGS
+                        python implementation.) (default: True)
 ```
 
 ## Authorship
