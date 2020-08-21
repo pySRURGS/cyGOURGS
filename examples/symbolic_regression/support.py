@@ -16,7 +16,6 @@ from functools import partial
 from itertools import chain
 from operator import eq
 
-
 class HallOfFame(object):
     """The hall of fame contains the best individual that ever lived in the
     population during the evolution. It is lexicographically sorted at all
@@ -116,3 +115,5 @@ class HallOfFame(object):
 
     def __str__(self):
         return str(self.items)
+
+        

@@ -32,10 +32,10 @@ import pandas
 import parmap
 import numexpr as ne
 import tqdm
+import lmfit
 import sys,os
 import sympy
-from math_funcs import (sympy_Sub, sympy_Div, sin, cos, tan, exp, log, sinh,
-                        cosh, tanh, sum, add, sub, mul, div, pow)
+from math_funcs import *
 from sympy import simplify, sympify, Symbol
 import time
 import argparse 
@@ -43,11 +43,12 @@ from sqlitedict import SqliteDict
 from support import HallOfFame
 sys.path.append(os.path.join('.', '..', '..'))
 import cython_call as cy
+start_time = time.time()
 
-fitting_param_prefix = 'begin_fp_'
-fitting_param_suffix = '_end_fp'
-variable_prefix = 'begin_v_'
-variable_suffix = '_end_v'
+fitting_param_prefix = 'params["p'
+fitting_param_suffix = '"]'
+variable_prefix = ''#'begin_v_'
+variable_suffix = ''#'_end_v'
 
 
 def has_nans(X):
@@ -97,10 +98,42 @@ def create_parameter_list(m):
     """
     my_pars = []
     for i in range(0, m):
-        my_pars.append(make_parameter_name('p' + str(i)))
+        my_pars.append(make_parameter_name(str(i)))
     return my_pars
 
 
+def create_fitting_lmfit_parameters(max_params, param_values=None):
+    """
+    Creates the lmfit.Parameters object based on the number of fitting 
+    parameters permitted in this symbolic regression problem.
+
+    Parameters
+    ----------
+    max_params: int
+        The maximum number of fitting parameters. Same as `max_num_fit_params`.
+
+    param_values: None OR (numpy.array of length max_params)
+        Specifies the values of the fitting parameters. If none, will default
+        to an array of ones, which are to be optimized later.
+
+    Returns
+    -------
+    params: lmfit.Parameters
+        Fitting parameter names specified as ['p' + str(integer) for integer
+        in range(0, max_params)]
+    """
+    params = lmfit.Parameters()
+    for int_param in range(0, max_params):
+        param_name = 'p' + str(int_param)
+        param_init_value = np.float(1)
+        params.add(param_name, param_init_value)
+    if param_values is not None:
+        for int_param in range(0, max_params):
+            param_name = 'p' + str(int_param)
+            params[param_name].value = param_values[int_param]
+    return params
+    
+    
 def make_variable_name(var):
     """
     Converts a variable name to pySRURGS safe variable names. Prevents string
@@ -220,6 +253,21 @@ class Result(object):
         return self.simplified_soln == other.simplified_soln
 
 
+def clean_all_parameter_names_for_sympy(equation_string, terminals):
+    for terminal in terminals:
+        if terminal.startswith('params'):
+            amended_terminal = clean_parameter_name_for_sympy(terminal)
+            equation_string = equation_string.replace(terminal, 
+                                                      amended_terminal)
+    return equation_string
+
+
+def clean_parameter_name_for_sympy(parameter_name):
+    amended_name = parameter_name.replace('["', '_')
+    amended_name = amended_name.replace('"]', '')
+    return amended_name
+    
+
 class Dataset(object):
     """
     A class used to store the dataset of the symbolic regression problem.
@@ -277,14 +325,17 @@ class Dataset(object):
         self._num_variables = len(self._x_labels)
         self._num_terminals = self._num_variables + int_max_params
         self._terminals_list = (create_parameter_list(int_max_params) +
-                                create_variable_list(path_to_csv_file))        
+                                create_variable_list(path_to_csv_file))
+        self._lmfit_params = create_fitting_lmfit_parameters(self._int_max_params)
+        self._sympy_namespace = self.make_sympy_namespace()
 
     def make_sympy_namespace(self):
         sympy_namespace = {}
         for variable_name in self._x_labels:
             sympy_namespace[variable_name] = sympy.Symbol(variable_name)
         for param_name in self._param_names:
-            sympy_namespace[param_name] = sympy.Symbol(param_name)
+            amended_name = clean_parameter_name_for_sympy(param_name)
+            sympy_namespace[amended_name] = sympy.Symbol(amended_name)
         sympy_namespace['add'] = sympy.Add
         sympy_namespace['sub'] = sympy_Sub
         sympy_namespace['mul'] = sympy.Mul
@@ -299,7 +350,7 @@ class Dataset(object):
         sympy_namespace['exp'] = sympy.Function('exp')
         sympy_namespace['log'] = sympy.Function('log')
         return sympy_namespace
-
+        
     def load_csv_data(self, path_to_csv, header=True):
         if header is True:
             dataframe = pandas.read_csv(path_to_csv)
@@ -437,35 +488,68 @@ class SymbolicRegressionConfig(object):
                                 path_to_weights)
 
 
-def evalSymbolicRegression(equation_string, SR_config):
+def compile(expr, variables):
+    """Compile the expression *expr*.
+    :param expr: Expression to compile. It can either be a PrimitiveTree,
+                 a string of Python code or any object that when
+                 converted into string produced a valid Python code
+                 expression.
+    :variables list: list of variable names
+    :returns: a function if the primitive set has 1 or more arguments,
+              or return the results produced by evaluating the tree.
+    """
+    code = str(expr)
+    if len(variables) > 0:
+        # This section is a stripped version of the lambdify
+        # function of SymPy 0.6.6.
+        args = 'params,' + ",".join(arg for arg in variables
+                                    if not arg.startswith('params'))
+        code = "lambda {args}: ({code})".format(args=args, code=code)
+    try:
+        return eval(code)
+    except MemoryError:
+        _, _, traceback = sys.exc_info()
+        raise MemoryError("DEAP : Error in tree evaluation :"
+                            " Python cannot evaluate a tree higher than 90. "
+                            "To avoid this problem, you should use bloat control on your "
+                            "operators. See the DEAP documentation for more information. "
+                            "DEAP will now abort.", traceback)
+
+                            
+def evalSymbolicRegression(equation_string, SR_config, mode='residual'):
     """
         Evaluates the proposed solution according to its goodness of fit 
         measures.
     """
-    # TODO need to add weights, fitting parameters, and simplify equations
-    data_dict = SR_config._dataset.get_data_dict()
-    independent_vars_vector, x_label = SR_config._dataset.get_independent_data()
-    dependent_var_vector, y_label = SR_config._dataset.get_dependent_data()
-    pdb.set_trace()
-    y_predicted = ne.evaluate(equation_string, local_dict=data_dict)
+    # TODO need to add fitting parameters
+    mydata = SR_config._dataset
+    data_dict = mydata.get_data_dict() 
+    independent_vars_vector, x_label = mydata.get_independent_data()
+    dependent_var_vector, y_label = mydata.get_dependent_data()
+    lambda_func = compile(equation_string, mydata._terminals_list)    
+    data_args = [mydata._data_dict[name] 
+                 for name in mydata._terminals_list 
+                 if not name.startswith('params')]
+    try:
+        minimizer_result = lmfit.minimize(lambda_func, mydata._lmfit_params, 
+                                          args=(*data_args,), method='leastsq', 
+                                          nan_policy='raise')
+    except ValueError:
+        return np.inf
+    mydata._lmfit_params = minimizer_result.params
+    y_predicted = lambda_func(mydata._lmfit_params, *data_args)
     y_actual = dependent_var_vector
     if mode == 'residual':
         residual = y_actual - y_predicted
-        # if SR_config._dataset._data_weights is not None:  # TODO
-        #     residual = np.multiply(residual, SR_config._dataset._data_weights)
-        print(residual)
-        output = float(np.sum(residual**2))  # residual sum of squares
-    elif mode == 'y_calc':
+        if mydata._data_weights is not None:
+            residual = np.multiply(residual, mydata._data_weights)
+        output = np.sum(residual**2)        
+    elif mode == 'evaluate':
         output = y_predicted
-    elif type(mode) == dict:  # QUESTION: what is this?
-        df = mode
-        y_value = eval(equation_string)
-        output = y_value
-    if np.size(output) == 1:
+    if np.size(output) == 1 and mode != 'residual':
         # if model only has parameters and no data variables, we can have a
         # situation where output is a single constant
         output = np.resize(output, np.size(independent_vars_vector))
-
     return output
     
     # TODO we need to ensure that fitting parameters are recognized and a suitable
@@ -475,16 +559,16 @@ def evalSymbolicRegression(equation_string, SR_config):
     # raise Exception("fix this")
 
 
-def simplify_equation_string(equation_string, dataframe):
-    # TODO
-    dataframe._sympy_namespace = dataframe.make_sympy_namespace()
-    s = sympy.sympify(equation_string, locals=dataframe._sympy_namespace)
-    try:
+def simplify_equation_string(equation_string, dataset):
+    equation_string = clean_all_parameter_names_for_sympy(equation_string, 
+                                                        dataset._terminals_list)
+    s = sympy.sympify(equation_string, locals=dataset._sympy_namespace)
+    try:        
         equation_string = str(sympy.simplify(s))
     except ValueError:
         pass
-    if 'zoo' in eqn_str:  # zoo (complex infinity) in sympy
-        raise FloatingPointError
+    if 'zoo' in equation_string:  # zoo (complex infinity) in sympy
+        return 'complex_infinity'
     # equation_string = remove_variable_tags(equation_string)
     # equation_string = remove_parameter_tags(equation_string)
     return equation_string
@@ -506,8 +590,7 @@ def main_random(seed, enum, max_tree_complx, SR_config):
         evaluates a randomly generated solution
     """
     soln = enum.uniform_random_global_search_once(max_tree_complx, seed=seed)
-    simplified_soln = simplify_equation_string(soln, 
-                                               SR_config._dataset._dataframe)
+    simplified_soln = simplify_equation_string(soln, SR_config._dataset)
     score = evalSymbolicRegression(soln, SR_config)
     result = Result(score, soln, simplified_soln)
     return result
@@ -520,9 +603,8 @@ def main_random_queued(seed, enum, max_tree_complx, queue, SR_config):
         used for multiprocessing
     """
     soln = enum.uniform_random_global_search_once(max_tree_complx, seed=seed)
-    simplified_soln = simplify_equation_string(soln, 
-                                               SR_config._dataset._dataframe)
-    score = evalSymbolicRegression(soln, SR_config)    
+    simplified_soln = simplify_equation_string(soln, SR_config._dataset)
+    score = evalSymbolicRegression(soln, SR_config)
     result = Result(score, soln, simplified_soln)    
     queue.put(result)
 
@@ -532,8 +614,7 @@ def main(soln, SR_config):
         evaluates a proposed solution
     """
     score = evalSymbolicRegression(soln, SR_config)
-    simplified_soln = simplify_equation_string(soln, 
-                                               SR_config._dataset._dataframe)
+    simplified_soln = simplify_equation_string(soln, SR_config._dataset)
     result = Result(score, soln, simplified_soln)    
     return result
 
@@ -545,8 +626,7 @@ def main_queued(soln, queue):
         used for multiprocessing
     """
     score = evalSymbolicRegression(soln)    
-    simplified_soln = simplify_equation_string(soln, 
-                                               SR_config._dataset._dataframe)
+    simplified_soln = simplify_equation_string(soln, SR_config._dataset)
     result = Result(score, soln, simplified_soln)    
     queue.put(result)
 
@@ -651,9 +731,9 @@ if __name__ == "__main__":
         elif multiproc == False:
             for soln in enum.exhaustive_global_search(
                                                  maximum_tree_complexity_index):
-                result = main(soln)
+                result = main(soln, SR_config)
                 score = result.fitness
-                hof.update(result)
+                hof.update([result])
                 iter = iter + 1
                 if score > max_score:
                     max_score = score
@@ -680,9 +760,9 @@ if __name__ == "__main__":
             for soln in enum.uniform_random_global_search(
                                                   maximum_tree_complexity_index,
                                                    n_iters, seeds):
-                result = main(soln)
+                result = main(soln, SR_config)
                 score = result.fitness
-                hof.update(result)
+                hof.update([result])
                 iter = iter + 1
                 if score > max_score:
                     max_score = score
