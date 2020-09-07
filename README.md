@@ -49,7 +49,8 @@ Installation on Windows is a bit more involved.
 3. Make sure the path to gcc is in your Environment Variables https://en.wikipedia.org/wiki/Environment_variable
 4. Install the C++ boost library https://www.boost.org/users/history/version_1_72_0.html
 5. Edit the `boost_path.py` file to point to the path of the Boost library. Follow the path formatting of the original example. Example: `path_to_boost="g:/c++_codes/boost_1_72_0"`
-6. Copy the repository to your computer and install using terminal: ```
+6. Copy the repository to your computer and install using terminal: 
+```
 git clone https://github.com/pySRURGS/cyGOURGS.git
 cd cyGOURGS
 pip3 install -r requirements.txt --user
