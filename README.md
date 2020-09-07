@@ -32,7 +32,8 @@ This is a C++/Cython port of pyGOURGS created for improved performance.
 ### On Ubuntu 18.04
 
 1. Everything but the Boost C++ codes are preinstalled by your distribution. You can install boost using `sudo apt-get install libboost-dev`
-2. Copy the repository to your computer and install using terminal: ```
+2. Copy the repository to your computer and install using terminal: 
+```
 git clone https://github.com/pySRURGS/cyGOURGS.git
 cd cyGOURGS
 pip3 install -r requirements.txt --user
