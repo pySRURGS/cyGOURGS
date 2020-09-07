@@ -46,6 +46,20 @@ pip3 install -r requirements.txt --user
 bash install.sh
 ```
 
+### On Windows
+
+Installation on Windows is a bit more involved.
+
+1. Install a C++ compiler (gcc) using https://sourceforge.net/projects/mingw/
+2. Install a terminal, I tend to use `git bash` https://gitforwindows.org/
+3. Make sure the path to gcc is in your Environment Variables https://en.wikipedia.org/wiki/Environment_variable
+4. Install the C++ boost library https://www.boost.org/users/history/version_1_72_0.html
+5. Use your terminal, `git bash`, to run the command `bash install.sh` in the cyGOURGS directory. The outcome should be ```
+$ bash install.sh
+running build_ext
+Completed installation without errors
+```
+
 ## Usage
 
 Users of pyGOURGS are referred to the similarly named `ant.py` in `./cyGOURGS/examples/ant.py` which has an identical interface with the addition of the `cppimpl` flag, which uses the C++ cyGOURGS when `True` and which uses the python3 pyGOURGS when `False`. 
