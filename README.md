@@ -6,10 +6,6 @@
 
 # Global Optimization by Uniform Random Global Search
 
-Users who are unfamiliar with GOURGS should refer to the 
-python version of this same software [pyGOURGS](https://github.com/pySRURGS/pyGOURGS). 
-This is a C++/Cython port of pyGOURGS created for improved performance.
-
 This software package solves problems whose solutions can be represented as 
 n-ary trees. These problems are typically solved using genetic programming. 
 For these problems, there is often little to no relationship between the data
@@ -19,6 +15,10 @@ evaluated to its human readable form. This makes pure random search an
 attractive algorithm with which to solve these kinds of problems. This software 
 is aimed at engineers, researchers and data scientists working in data analysis 
 and computational optimization.
+
+Users who are unfamiliar with GOURGS should refer to the 
+python version of this same software [pyGOURGS](https://github.com/pySRURGS/pyGOURGS). 
+This is a C++/Cython port of pyGOURGS created for improved performance.
 
 ## Features 
 
@@ -31,15 +31,9 @@ and computational optimization.
 
 ### On Ubuntu 18.04
 
-Everything but the Boost C++ codes are preinstalled by your distribution. You can install boost using 
-
-```
-sudo apt-get install libboost-dev
-```
-
-Copy the repository to your computer and install using terminal:
-
-```
+1. Everything but the Boost C++ codes are preinstalled by your distribution. You can install boost using ```
+sudo apt-get install libboost-dev ```
+2. Copy the repository to your computer and install using terminal: ```
 git clone https://github.com/pySRURGS/cyGOURGS.git
 cd cyGOURGS
 pip3 install -r requirements.txt --user
@@ -54,10 +48,12 @@ Installation on Windows is a bit more involved.
 2. Install a terminal, I tend to use `git bash` https://gitforwindows.org/
 3. Make sure the path to gcc is in your Environment Variables https://en.wikipedia.org/wiki/Environment_variable
 4. Install the C++ boost library https://www.boost.org/users/history/version_1_72_0.html
-5. Use your terminal, `git bash`, to run the command `bash install.sh` in the cyGOURGS directory. The outcome should be ```
-$ bash install.sh
-running build_ext
-Completed installation without errors
+5. Edit the `boost_path.py` file to point to the path of the Boost library. Follow the path formatting of the original example. Example: `path_to_boost="g:/c++_codes/boost_1_72_0"`
+6. Copy the repository to your computer and install using terminal: ```
+git clone https://github.com/pySRURGS/cyGOURGS.git
+cd cyGOURGS
+pip3 install -r requirements.txt --user
+bash install.sh
 ```
 
 ## Usage
