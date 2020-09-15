@@ -7,6 +7,7 @@ set -e
 origversion=$(python -V 2>&1 | grep -Po '(?<=Python )(.+)')
 version=$(echo "${origversion//./}")
 version=${version:0:2}
+python3=0
 if [[ $version -ne "38" ]] && [[ $version -ne "37" ]] && \
    [[ $version -ne "36" ]]; then
     echo "python version is invalid." 
@@ -16,6 +17,7 @@ if [[ $version -ne "38" ]] && [[ $version -ne "37" ]] && \
     origversion=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
     version=$(echo "${origversion//./}")
     version=${version:0:2}
+    python3=1
     if [[ $version -ne "38" ]] && [[ $version -ne "37" ]] && \
        [[ $version -ne "36" ]]; then
         exit 125
@@ -34,5 +36,9 @@ elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]; then
 fi
 
 # 3. Compile the Cython code
-python setup.py build_ext --inplace
+if [[ $python3 -eq 0 ]]; then
+    python setup.py build_ext --inplace
+elif [[ $python3 -eq 1 ]]; then
+    python3 setup.py build_ext --inplace
+fi
 echo "Completed installation without errors"
