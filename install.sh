@@ -7,11 +7,19 @@ set -e
 origversion=$(python -V 2>&1 | grep -Po '(?<=Python )(.+)')
 version=$(echo "${origversion//./}")
 version=${version:0:2}
-if [[ $version -ne "38" ]] && [[ $version -ne "37" ]] && [[ $version -ne "36" ]]; then
+if [[ $version -ne "38" ]] && [[ $version -ne "37" ]] && \
+   [[ $version -ne "36" ]]; then
     echo "python version is invalid." 
     echo "Valid versions are 3.6.*, 3.7.*, 3.8.*" 
     echo "Version is: " $origversion
-    exit 125
+    echo "Going to try python3"
+    origversion=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
+    version=$(echo "${origversion//./}")
+    version=${version:0:2}
+    if [[ $version -ne "38" ]] && [[ $version -ne "37" ]] && \
+       [[ $version -ne "36" ]]; then
+        exit 125
+    fi
 fi
 
 # 2. Compile the main.exe, demonstrating that codes of core functionality compile
