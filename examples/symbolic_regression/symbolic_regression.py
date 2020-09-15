@@ -525,23 +525,30 @@ def evalSymbolicRegression(equation_string, SR_config, mode='residual'):
     data_dict = mydata.get_data_dict() 
     independent_vars_vector, x_label = mydata.get_independent_data()
     dependent_var_vector, y_label = mydata.get_dependent_data()
+    resid_lambda_func = compile(mydata._y_label + ' - ' + equation_string, mydata._terminals_list + [mydata._y_label])    
     lambda_func = compile(equation_string, mydata._terminals_list)    
     data_args = [mydata._data_dict[name] 
                  for name in mydata._terminals_list 
                  if not name.startswith('params')]
-    try:
-        minimizer_result = lmfit.minimize(lambda_func, mydata._lmfit_params, 
-                                          args=(*data_args,), method='leastsq', 
-                                          nan_policy='raise')
-    except ValueError:
-        return np.inf
+    data_args = data_args + [mydata._data_dict[mydata._y_label]]
+    try: 
+        try:
+            minimizer_result = lmfit.minimize(resid_lambda_func, mydata._lmfit_params, 
+                                              args=data_args, method='leastsq', 
+                                              nan_policy='raise')
+        except ValueError:
+            return np.inf
+    except TypeError:
+        pdb.set_trace()
     mydata._lmfit_params = minimizer_result.params
-    y_predicted = lambda_func(mydata._lmfit_params, *data_args)
+    
+    y_predicted = lambda_func(mydata._lmfit_params, *data_args[:-1])
     y_actual = dependent_var_vector
     if mode == 'residual':
         residual = y_actual - y_predicted
+
         if mydata._data_weights is not None:
-            residual = np.multiply(residual, mydata._data_weights)
+            residual = np.multiply(residual, mydata._data_weights)            
         output = np.sum(residual**2)        
     elif mode == 'evaluate':
         output = y_predicted
