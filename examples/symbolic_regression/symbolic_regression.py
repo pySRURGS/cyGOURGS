@@ -30,7 +30,6 @@ from functools import partial
 import multiprocessing as mp
 import pandas
 import parmap
-import numexpr as ne
 import tqdm
 import lmfit
 import sys,os
