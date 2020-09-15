@@ -9,3 +9,4 @@ tabulate==0.8.3
 parmap==1.5.2
 tqdm==4.32.2
 pbs==0.110
+lmfit==1.0.1
