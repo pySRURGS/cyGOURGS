@@ -659,7 +659,7 @@ if __name__ == "__main__":
     parser.add_argument("-funcs_arity_two", help="a comma separated string listing the functions of arity two you want to be considered. Permitted:add,sub,mul,div,pow", default='add,sub,mul,div,pow')
     parser.add_argument("-funcs_arity_one", help="a comma separated string listing the functions of arity one you want to be considered. Permitted:sin,cos,tan,exp,log,sinh,cosh,tanh")
     parser.add_argument("-num_trees", help="pyGOURGS iterates through all the possible trees using an enumeration scheme. This argument specifies the number of trees to which we restrict our search.", type=int, default=1000)
-    parser.add_argument("-num_iters", help="An integer specifying the number of solutions to be attempted in this run", type=int, default=10000)
+    parser.add_argument("-num_iters", help="An integer specifying the number of solutions to be attempted in this run", type=int, default=100)
     parser.add_argument("-hall_of_fame_size", help="An integer specifying the number of solutions to be housed in this run", type=int, default=100)
     parser.add_argument("-max_num_fit_params", help="the maximum number of fitting parameters permitted in the generated models", default=3, type=int)
     parser.add_argument("-freq_print", help="An integer specifying how many strategies should be attempted before printing current job status", type=int, default=10)
@@ -707,7 +707,7 @@ if __name__ == "__main__":
     enum = cy.CyEnumerator(pset)
     if deterministic == False:
         deterministic = None
-    max_score = 0
+    best_score = 0
     iter = 0
     manager = mp.Manager()
     queue = manager.Queue()
@@ -741,10 +741,10 @@ if __name__ == "__main__":
                 score = result.fitness
                 hof.update([result])
                 iter = iter + 1
-                if score > max_score:
-                    max_score = score
+                if score < best_score:
+                    best_score = score
                 if iter % frequency_printing == 0:
-                    print("best score of this run:" + str(max_score),
+                    print("best score of this run:" + str(best_score),
                           'at iteration:'+ str(iter), end='\r')
         else:
             raise Exception("Invalid value multiproc must be true/false")
@@ -770,10 +770,10 @@ if __name__ == "__main__":
                 score = result.fitness
                 hof.update([result])
                 iter = iter + 1
-                if score > max_score:
-                    max_score = score
+                if score < best_score:
+                    best_score = score
                 if iter % frequency_printing == 0:
-                    print("best score of this run:" + str(max_score),
+                    print("best score of this run:" + str(best_score),
                           'at iteration:'+ str(iter), end='\r')
         else:
             raise Exception("Invalid multiproc, must be true/false")
@@ -782,7 +782,8 @@ if __name__ == "__main__":
     totalTime = time.time() - start_time
     print("\nTotal time: ", totalTime)
     best = hof.items[0]
+    print(best)
     # save halloffame, sr_config, at output_db, with key == timestamp
-    with SqliteDict(output_db, autocommit=False) as results_dict:
-        nowtime = str(datetime.datetime.now())
-        results_dict[nowtime] = [hof, sr_config]
+#    with SqliteDict(output_db, autocommit=False) as results_dict:
+#        nowtime = str(datetime.datetime.now())
+#        results_dict[nowtime] = [hof, SR_config]
