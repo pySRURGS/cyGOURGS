@@ -8,7 +8,9 @@ import os
 import sys
 import unittest
 import numpy as np
-sys.path.append(os.path.join('.', '..'))
+sys.path.append(os.path.join('.', '..', '..'))
+import cython_call as cy
+import symbolic_regression as sr
 import pdb
 try:
     import sh
