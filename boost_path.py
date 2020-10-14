@@ -1,1 +1,1 @@
-path_to_boost="g:/c++_codes/boost_1_72_0" # this path definition needs to be compatible with both bash and python3. Do not use backward slashes '\' in path_to_boost definition.
+path_to_boost="c:/boost/boost_1_72_0" # this path definition needs to be compatible with both bash and python3. Do not use backward slashes '\' in path_to_boost definition. Do not put spaces adjacent to the equals sign.

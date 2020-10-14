@@ -41,4 +41,4 @@ if [[ $python3 -eq 0 ]]; then
 elif [[ $python3 -eq 1 ]]; then
     python3 setup.py build_ext --inplace
 fi
-echo "Completed installation without errors"
+echo "Completed installation."
