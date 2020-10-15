@@ -652,6 +652,33 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
+def create_seeds(start_time, n_iters):
+    '''
+        Creates a set of seeds between 0 and the max value of C long which is 
+        system dependent
+    '''
+    if sys.maxsize > 2**32:
+        bits = 64
+    else:
+        bits = 32
+    if os.name == 'nt':
+        LONG_MAX = 2**31
+    elif os.name == 'posix' and bits == 64:
+        LONG_MAX = 2**63
+    elif os.name == 'posix' and bits == 32:
+        LONG_MAX = 2**31
+    else:
+        raise Exception("Invalid os.name: only nt and posix are supported")
+    a_time = float(start_time)
+    seeds = np.arange(1, n_iters+1).astype(np.float)
+    seeds = (seeds * a_time) % LONG_MAX
+    if os.name == 'posix' and bits == 64:
+        seeds = seeds.astype(np.int64).tolist()
+    else:
+        seeds = seeds.astype(np.int32).tolist()   
+    return seeds
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='symbolic_regression.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("csv_path", help="An absolute filepath of the csv that houses your numerical data. Must have a header row of variable names.")
@@ -707,7 +734,7 @@ if __name__ == "__main__":
     enum = cy.CyEnumerator(pset)
     if deterministic == False:
         deterministic = None
-    best_score = 0
+    best_score = np.inf
     iter = 0
     manager = mp.Manager()
     queue = manager.Queue()
@@ -744,16 +771,14 @@ if __name__ == "__main__":
                 if score < best_score:
                     best_score = score
                 if iter % frequency_printing == 0:
-                    print("best score of this run:" + str(best_score),
-                          'at iteration:'+ str(iter), end='\r')
+                    print("best score:" + str(best_score),
+                          'current score:' + str(score),
+                          'at iteration:'+ str(iter), end='\x1b[1K\r')
         else:
             raise Exception("Invalid value multiproc must be true/false")
     elif exhaustive == False:
         num_solns = n_iters
-        a_time = int(start_time)
-        seeds = np.arange(0, n_iters)
-        seeds = seeds * a_time
-        seeds = seeds.tolist()
+        seeds = create_seeds(start_time, n_iters)
         if multiproc == True:
             runner = mp.Process(target=solution_saving_worker,
                              args=(queue, num_solns, hof))
@@ -765,7 +790,7 @@ if __name__ == "__main__":
         elif multiproc == False:
             for soln in enum.uniform_random_global_search(
                                                   maximum_tree_complexity_index,
-                                                   n_iters, seeds):
+                                                                n_iters, seeds):
                 result = main(soln, SR_config)
                 score = result.fitness
                 hof.update([result])
@@ -773,17 +798,17 @@ if __name__ == "__main__":
                 if score < best_score:
                     best_score = score
                 if iter % frequency_printing == 0:
-                    print("best score of this run:" + str(best_score),
-                          'at iteration:'+ str(iter), end='\r')
+                    print("best score:" + str(best_score),
+                          'current score:' + str(score),
+                          'at iteration:'+ str(iter), end='\x1b[1K\r')
         else:
             raise Exception("Invalid multiproc, must be true/false")
     else:
         raise Exception("Invalid value for exhaustive")
     totalTime = time.time() - start_time
-    print("\nTotal time: ", totalTime)
-    best = hof.items[0]
-    print(best)
-    # save halloffame, sr_config, at output_db, with key == timestamp
-#    with SqliteDict(output_db, autocommit=False) as results_dict:
-#        nowtime = str(datetime.datetime.now())
-#        results_dict[nowtime] = [hof, SR_config]
+    print("\nTotal time: ", totalTime)    
+        
+    #    # save halloffame, sr_config, at output_db, with key == timestamp
+    #    with SqliteDict(output_db, autocommit=False) as results_dict:
+    #        nowtime = str(datetime.datetime.now())
+    #        results_dict[nowtime] = [hof, SR_config]

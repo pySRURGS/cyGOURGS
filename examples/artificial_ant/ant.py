@@ -202,6 +202,34 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
+
+def create_seeds(start_time, n_iters):
+    '''
+        Creates a set of seeds between 0 and the max value of C long which is 
+        system dependent
+    '''
+    if sys.maxsize > 2**32:
+        bits = 64
+    else:
+        bits = 32
+    if os.name == 'nt':
+        LONG_MAX = 2**31
+    elif os.name == 'posix' and bits == 64:
+        LONG_MAX = 2**63
+    elif os.name == 'posix' and bits == 32:
+        LONG_MAX = 2**31
+    else:
+        raise Exception("Invalid os.name: only nt and posix are supported")
+    a_time = float(start_time % 1E8)
+    seeds = np.arange(1, n_iters+1).astype(np.float)
+    seeds = (seeds * a_time) % LONG_MAX
+    if os.name == 'posix' and bits == 64:
+        seeds = seeds.astype(np.int64).tolist()
+    else:
+        seeds = seeds.astype(np.int32).tolist()
+    return seeds
+            
+        
 ant = AntSimulator(600)
 with open("./johnmuir_trail.txt") as trail_file:
     ant.parse_matrix(trail_file)
@@ -290,10 +318,7 @@ if __name__ == "__main__":
             raise Exception("Invalid value multiproc must be true/false")
     elif exhaustive == False:
         num_solns = n_iters
-        a_time = int(start_time)
-        seeds = np.arange(0, n_iters)
-        seeds = seeds * a_time
-        seeds = seeds.tolist()
+        seeds = create_seeds(start_time, n_iters)
         if multiproc == True:
             runner = mp.Process(target=solution_saving_worker,
                              args=(queue, num_solns, output_db))

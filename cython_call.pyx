@@ -64,6 +64,10 @@ cdef class CyPrimitiveSet:
     def get_operators(self, arity):
         operators = self.primitiveSet.get_operators(arity)
         return operators
+        
+    def get_variables(self):
+        variables = self.primitiveSet.get_variables()
+        return variables
                
 cdef extern from "enumerator.h":
     # Declare a c++ class interface for enumerator
