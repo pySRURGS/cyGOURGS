@@ -32,7 +32,7 @@ namespace patch
 using namespace std;
 using namespace std::chrono;
 namespace mp = boost::multiprecision;
-
+typedef unsigned long long U64;
 
 void Enumerator::init(PrimitiveSet primitiveSet)
 {
@@ -281,7 +281,7 @@ int Enumerator::get_Q(int n)
     return 0;
 }
 
-vector<int> Enumerator::calculate_Q(int n)
+vector<int> Enumerator::calculate_Q(int N)
 {
     /*
     Calculates the number of total number of solutions in the solution space
@@ -294,17 +294,17 @@ vector<int> Enumerator::calculate_Q(int n)
     Returns
     -------
     Q: vector<int>
-        The number of possible solutions for each value of `i` in {0, ..., n-1}
+        The number of possible solutions for each value of `i` in {0, ..., N-1}
     */
     int q = 0;
     int r_i;
     int s_i;
     int product;
-    if(n < m_results_for_calculate_Q.size())
+    if(N < m_results_for_calculate_Q.size())
     {
         return m_results_for_calculate_Q;
     }
-    for(int i=0; i<n; i++)
+    for(int i=0; i<N; i++)
     {
         r_i = calculate_R_i(i);
         s_i = calculate_S_i(i);
