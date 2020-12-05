@@ -1,6 +1,7 @@
 #ifndef ENUMERATOR_H
 #define ENUMERATOR_H
 #include "primitiveset.h"
+typedef unsigned long long U64;
 
 class Enumerator
 {
@@ -14,10 +15,13 @@ public:
     std::string uniform_random_global_search_once(int n, long seed = LONG_MAX);
     int calculate_R_i(int i);
     int calculate_S_i(int i);
+    U64 calculate_S_i2(U64 i);
     int get_Q(int n);
     std::vector<int> calculate_Q(int n);
     std::vector<int> calculate_all_G_i_b(int i);
+    std::vector<U64> calculate_all_G_i_b2(U64 i);
     int calculate_G_i_b(int i, int b);
+    U64 calculate_G_i_b2(U64 i, int b);
     int calculate_l_i_b(int i, int b);
     int calculate_a_i(int i);
     std::string generate_specified_solution(int i, int r, int s, int n);
@@ -47,8 +51,10 @@ private:
     std::vector<int> m_results_for_calculate_Q;
     std::vector<int> m_q;
     std::map<int, std::vector<int> > m_all_g_is;
-    std::map<int,int> m_s_i_values;
-    std::map<int,int> m_r_i_values;
+    std::map<U64, std::vector<U64> > m_all_g_is2;
+    std::map<int, int> m_s_i_values;
+    std::map<U64, U64> m_s_i_values2;
+    std::map<int, int> m_r_i_values;
 };
 
 #endif // ENUMERATOR_H

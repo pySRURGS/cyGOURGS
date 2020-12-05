@@ -268,6 +268,40 @@ int Enumerator::calculate_S_i(int i)
     return s_i;
 }
 
+
+U64 Enumerator::calculate_S_i2(U64 i)
+{
+    /*
+    Calculates the number of possible configurations of terminals in the
+    `i`th tree.
+
+    Parameters
+    ----------
+    i: int
+        A non-negative integer which will be used to map to a unique n-ary
+        trees
+
+    Returns
+    -------
+    S_i: U64
+        The number of possible configurations of terminals in the `i`th
+        tree
+    */
+    std::map<U64, U64>::iterator it = m_s_i_values2.find(i);
+    if (it != m_s_i_values2.end())
+    {
+        return it->second;
+    }
+    int m = m_primitiveSet.get_terminals().size();
+    int j_i = calculate_a_i(i);
+    U64 m2 = m;
+    U64 j_i2 = j_i;
+    U64 s_i = pow(m, j_i);
+    m_s_i_values2[i] = s_i;
+    return s_i;
+}
+
+
 int Enumerator::get_Q(int n)
 {
     if(n > 1)
@@ -335,6 +369,24 @@ vector<int> Enumerator::calculate_all_G_i_b(int i)
     return list_g_i_b;
 }
 
+vector<U64> Enumerator::calculate_all_G_i_b2(U64 i)
+{
+    std::map<U64, std::vector<U64> >::iterator it = m_all_g_is2.find(i);
+    if (it != m_all_g_is2.end())
+    {
+        return it->second;
+    }
+    vector<int> arities = m_primitiveSet.get_arities();
+    int k = arities.size();
+    vector<U64> list_g_i_b;
+    for (int b = 0; b < k; b++)
+    {
+        list_g_i_b.push_back(calculate_G_i_b2(i, b));
+    }
+    m_all_g_is2[i] = list_g_i_b;
+    return list_g_i_b;
+}
+
 int Enumerator::calculate_G_i_b(int i, int b)
 {
     /*
@@ -361,6 +413,38 @@ int Enumerator::calculate_G_i_b(int i, int b)
     int l_i_b = calculate_l_i_b(i, b);
     int g_i_b = pow(f_b, l_i_b);
     return g_i_b;
+}
+
+U64 Enumerator::calculate_G_i_b2(U64 i, int b)
+{
+    /*
+    Calculates the number of possible configurations of operators of arity 
+    arities[`b`] in the `i`th tree.
+
+    Parameters
+    ----------
+    i: U64
+        A non-negative integer which will be used to map to a unique n-ary 
+        trees
+
+    b: U64
+        Maps via `arities[b]` to the arity of operators being considered
+
+    Returns
+    -------
+    G_i_b : U64
+        the number of possible configurations of operators of arity 
+        `arities`[b]
+    */
+    vector<int> arities = m_primitiveSet.get_arities();
+    int f_b = m_primitiveSet.get_operators(arities[b]).size();
+    int l_i_b = calculate_l_i_b(i, b);
+    U64 l_i_b2;
+    U64 f_b2;
+    l_i_b2 = l_i_b;
+    f_b2 = f_b;
+    U64 g_i_b2 = pow(f_b2, l_i_b2);
+    return g_i_b2;
 }
 
 int Enumerator::calculate_l_i_b(int i, int b)
