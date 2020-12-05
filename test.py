@@ -7,7 +7,7 @@ import numpy as np
 from operator import add, sub, truediv, mul
 sys.path.append(os.path.join('.', 'pyGOURGS'))
 sys.path.append(os.path.join('.', 'examples'))
-import pyGOURGS.pyGOURGS as pg
+import pyGOURGS as pg
 import cython_call as cy
 import pdb
 
@@ -143,8 +143,14 @@ class TestSuite(unittest.TestCase):
             for cy_soln, py_soln in zip(cy_solns, py_solns):          
                 self.assertEqual(cy_soln, py_soln)
 
-    def test_compare_generate_specified_solution(self):
-        for i in [1, 10, 1000, 10000]:
+    def test_compare_generate_specified_solution(self):        
+        # add a bunch of variables so that we try to catch errors 
+        # associated with int overflow
+        for i in range(0,2):
+            self.pset.add_variable('k' + str(i))
+        for j in range(0,2):
+            self.pset.add_operator('oper' + str(j), j % 4 + 1)
+        for i in [1, 10, 1000, 10000, 1000000]:
             N = i + 1            
             R_i = self.enum.calculate_R_i(i)
             S_i = self.enum.calculate_S_i(i)

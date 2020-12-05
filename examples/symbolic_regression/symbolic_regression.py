@@ -41,7 +41,9 @@ import argparse
 from sqlitedict import SqliteDict
 from support import HallOfFame
 sys.path.append(os.path.join('.', '..', '..'))
+sys.path.append(os.path.join('.', '..', '..', 'pyGOURGS'))
 import cython_call as cy
+import pyGOURGS as pg
 start_time = time.time()
 
 fitting_param_prefix = 'params["p'
@@ -678,6 +680,27 @@ def create_seeds(start_time, n_iters):
         seeds = seeds.astype(np.int32).tolist()   
     return seeds
 
+def test_for_overflow(num_trees, enum, enum_pg):
+    '''
+        Compares the output of pyGOURGS and cyGOURGS for this problem set to 
+        check for overflow errors in cyGOURGS. 
+        
+        If errors arise, then you need to stick with using pyGOURGS
+    '''
+    i = num_trees
+    N = i + 1
+    R_i = enum.calculate_R_i(i)
+    S_i = enum.calculate_S_i(i)
+    R_i_pg = enum_pg.calculate_R_i(i)
+    S_i_pg = enum_pg.calculate_S_i(i)
+    assert(R_i == R_i_pg)
+    assert(S_i == S_i_pg)
+    r = R_i - 1
+    s = S_i - 1
+    cy_soln = enum.generate_specified_solution(i, r, s, N)
+    py_soln = enum_pg.generate_specified_solution(i, r, s, N)
+    assert(cy_soln.decode('utf-8') == py_soln)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='symbolic_regression.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -724,14 +747,35 @@ if __name__ == "__main__":
                                         max_num_fit_params, 
                                         maximum_tree_complexity_index, 
                                         weights_path)
-    pset = cy.CyPrimitiveSet()    
-    for operator_arity_2 in n_funcs:        
-        pset.add_operator(operator_arity_2, 2)
-    for operator_arity_1 in f_funcs:        
-        pset.add_operator(operator_arity_1, 1)
-    for terminal in SR_config._dataset._terminals_list:
-        pset.add_variable(terminal)
-    enum = cy.CyEnumerator(pset)
+    pset_list = []
+    enum_list = []
+    for mode in ['cython', 'python']:
+        if mode == 'cython':
+            pset = cy.CyPrimitiveSet()
+        elif mode == 'python':
+            pset = pg.PrimitiveSet()
+        for operator_arity_2 in n_funcs:        
+            pset.add_operator(operator_arity_2, 2)
+        for operator_arity_1 in f_funcs:        
+            pset.add_operator(operator_arity_1, 1)
+        for terminal in SR_config._dataset._terminals_list:
+            pset.add_variable(terminal)
+        if mode == 'cython':
+            enum = cy.CyEnumerator(pset)
+        if mode == 'python':
+            enum = pg.Enumerator(pset)
+        pset_list.append(pset)
+        enum_list.append(enum)
+    # test to ensure no overflow error with this pset
+    try:
+        test_for_overflow(maximum_tree_complexity_index, 
+                          enum_list[0], enum_list[1])
+    except Exception as e:        
+        print(e)
+        print("Overflow error encountered, use pyGOURGS not cyGOURGS")
+        exit(1)
+    enum = enum_list[0]
+    pset = pset_list[0]
     if deterministic == False:
         deterministic = None
     best_score = np.inf
@@ -741,7 +785,7 @@ if __name__ == "__main__":
     hof = HallOfFame(maxsize=100)
     if exhaustive == True:
         _, weights = enum.calculate_Q(maximum_tree_complexity_index)
-        num_solns = int(numpy.sum(weights))
+        num_solns = int(np.sum(weights))
         txt = input("The number of equations to be considered is " +
                     str(num_solns) + ", do you want to proceed?" +
                     " If yes, press 'c' then 'enter'.")
